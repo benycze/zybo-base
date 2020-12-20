@@ -27,9 +27,11 @@ open_project zybo-base.xpr
 # Run the synthesis, implementation, write a bitstream and export the architecture
 puts "INFO: Translating the desing ..."
 
+reset_run synth_1
 launch_runs synth_1 -jobs 2 -verbose
 wait_on_run synth_1
 
+reset_run impl_1
 launch_runs impl_1 -jobs 2 -verbose
 wait_on_run impl_1
 
