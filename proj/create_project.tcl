@@ -57,13 +57,14 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
 # Add local files from the original project (-no_copy_sources specified)
 # Fill all included paths here
 puts "INFO: Adding files into the project ..."
+set bd_file "src/bd/board_design/board_design.bd"
+
 set files [list \
- [file normalize "${origin_dir}/src/bd/board_design/board_design.bd" ] \
+ [file normalize "${origin_dir}/${bd_file}" ] \
 ]
 add_files -scan_for_includes -verbose -fileset sources_1 $files
 
 # Register the BD  
-set bd_file "src/bd/board_design/board_design.bd"
 set bd_file_obj [get_files -of_objects [get_filesets sources_1] [list "*$bd_file"]]
 set_property -name "registered_with_manager" -value "1" -objects $bd_file_obj
 
@@ -81,7 +82,7 @@ add_files -fileset constrs_1 $constr_files
 
 # Make a wrapper of top-level design and set is as a top
 add_files -norecurse [ \
-  make_wrapper -files [get_files -of_objects [get_filesets sources_1] [list "*src/bd/board_design/board_design.bd"]] -top -force
+  make_wrapper -files [get_files -of_objects [get_filesets sources_1] [list "*${bd_file}"]] -top -force
 ]
 
 set obj [get_filesets sources_1]

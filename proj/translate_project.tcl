@@ -26,30 +26,17 @@ open_project zybo-base.xpr
 
 # Run the synthesis, implementation, write a bitstream and export the architecture
 puts "INFO: Translating the desing ..."
-    # Synthesis ---------------------------------
-synth_design
-write_checkpoint -force ${results_dir}/post_synth.dcp
 
-    # Optimizations & routing -------------------
-opt_design
-route_design
-write_checkpoint -force ${results_dir}/post_route.dcp
+launch_runs synth_1 -jobs 2 -verbose
+wait_on_run synth_1
 
-    # Placing -----------------------------------
-place_design
-phys_opt_design
-write_checkpoint -force ${results_dir}/post_place.dcp
+launch_runs impl_1 -jobs 2 -verbose
+wait_on_run impl_1
 
-    # Reporting ---------------------------------
-report_route_status -file ${results_dir}/post_route_status.rpt
-report_timing_summary -file ${results_dir}/post_route_timing_summary.rpt
-report_utilization -file ${results_dir}/post_place_util.rpt
-report_power -file ${results_dir}/post_route_power.rpt
-report_drc -file ${results_dir}/post_imp_drc.rpt
-report_io -file ${results_dir}/post_imp_io.rpt
+launch_runs impl_1 -to_step write_bitstream -jobs 2 -verbose
+wait_on_run impl_1
 
-    # Bitstream generation ----------------------
-write_bitstream -verbose -force ${results_dir}/top.bit
+puts "INFO: Implementation done!"
 
     # XSA export --------------------------------
 puts "INFO: Exporting the design to XSA: $xsa_file"
