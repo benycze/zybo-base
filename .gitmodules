@@ -1,0 +1,3 @@
+[submodule "src/3rd-party/vivado-library"]
+	path = src/3rd-party/vivado-library
+	url = https://github.com/digilent/vivado-library
