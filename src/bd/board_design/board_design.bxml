@@ -2,10 +2,10 @@
 <Root MajorVersion="0" MinorVersion="39">
   <CompositeFile CompositeFileTopName="board_design" CanBeSetAsTop="false" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="STALE" Timestamp="1608485078"/>
-    <Generation Name="IMPLEMENTATION" State="STALE" Timestamp="1608485078"/>
-    <Generation Name="SIMULATION" State="STALE" Timestamp="1608485078"/>
-    <Generation Name="HW_HANDOFF" State="STALE" Timestamp="1608485078"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1608488301"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1608488301"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1608488301"/>
+    <Generation Name="HW_HANDOFF" State="GENERATED" Timestamp="1608488301"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip/board_design_processing_system7_0_0/board_design_processing_system7_0_0.xci" Type="IP">
         <Instance HierarchyPath="processing_system7_0"/>
@@ -60,6 +60,14 @@
       </File>
       <File Name="ip/board_design_axi_gpio_1_0/board_design_axi_gpio_1_0.xci" Type="IP">
         <Instance HierarchyPath="axi_gpio_sw"/>
+        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
+        <Library Name="xil_defaultlib"/>
+        <UsedIn Val="SYNTHESIS"/>
+        <UsedIn Val="IMPLEMENTATION"/>
+        <UsedIn Val="SIMULATION"/>
+      </File>
+      <File Name="ip/board_design_PWM_0_0/board_design_PWM_0_0.xci" Type="IP">
+        <Instance HierarchyPath="axi_led_pwm"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
