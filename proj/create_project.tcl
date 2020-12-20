@@ -70,7 +70,7 @@ set_property -name "registered_with_manager" -value "1" -objects $bd_file_obj
 # Deal with IP cores
 puts "INFO: Updating IP cores ..."
 set_property ip_repo_paths [file normalize ${origin_dir}/src/3rd-party/vivado-library/ip] [current_project]
-update_ip_catalog -rebuild -verbose
+update_ip_catalog -rebuild
 
 # Constraint files
 set constr_files [list \
@@ -131,4 +131,4 @@ set_property -name "steps.write_bitstream.args.verbose" -value "1" -objects $obj
 # set the current impl run
 current_run -implementation [get_runs impl_1]
 
-puts "INFO: Project created:${_xil_proj_name_} !"
+puts "INFO: Project created: ${_xil_proj_name_} !"

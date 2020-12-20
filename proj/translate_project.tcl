@@ -29,14 +29,17 @@ puts "INFO: Translating the desing ..."
     # Synthesis ---------------------------------
 synth_design
 write_checkpoint -force ${results_dir}/post_synth.dcp
+
     # Optimizations & routing -------------------
 opt_design
 route_design
 write_checkpoint -force ${results_dir}/post_route.dcp
+
     # Placing -----------------------------------
 place_design
 phys_opt_design
 write_checkpoint -force ${results_dir}/post_place.dcp
+
     # Reporting ---------------------------------
 report_route_status -file ${results_dir}/post_route_status.rpt
 report_timing_summary -file ${results_dir}/post_route_timing_summary.rpt
@@ -44,8 +47,10 @@ report_utilization -file ${results_dir}/post_place_util.rpt
 report_power -file ${results_dir}/post_route_power.rpt
 report_drc -file ${results_dir}/post_imp_drc.rpt
 report_io -file ${results_dir}/post_imp_io.rpt
+
     # Bitstream generation ----------------------
 write_bitstream -verbose -force ${results_dir}/top.bit
+
     # XSA export --------------------------------
 puts "INFO: Exporting the design to XSA: $xsa_file"
 write_hw_platform -fixed -force  -include_bit -file $xsa_file

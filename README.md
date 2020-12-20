@@ -25,3 +25,12 @@ or
 After that, you can use the Vivado and open the `zybo-base.xpr` file. All source files, board designs, HDL and
 IP cores are under the `src` directory and they are included in the [create_project.tcl](proj/create_project.tcl)
 file. Therefore, edit this file if you want to version it and have a possibility to restore a project!
+
+There is also a helping (and simple) tcl script which can be used for the automatic export of HW design from the 
+command line.
+It just opens the created project and runs syntheis, implementation, bitstream generation and HW export to 
+XSA file. All you have to do is to run the similar command like before:
+
+```bash
+vivado -mode batch -source translate_project.tcl
+```
