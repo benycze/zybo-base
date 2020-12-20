@@ -10,7 +10,7 @@
 if {[info exists ::xsa_file]} {
 	set xsa_file $::xsa_file
 } else {
-	set xsa_file [join [file normalize [file dirname [info script]]] "/board_design_wrapper.xsa"]
+    set xsa_file [join [list [file normalize [file dirname [info script]]] "/board_design_wrapper.xsa"] "" ]
 }
 
 # Run the translation flow
