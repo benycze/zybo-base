@@ -7,7 +7,7 @@
 # -------------------------------------------------------------------------------
 
 # #############################################################################
-# Source project creation
+# Create a project
 # #############################################################################
 
 if {[info exists ::create_path]} {
@@ -15,6 +15,7 @@ if {[info exists ::create_path]} {
 } else {
 	set dest_dir [file normalize [file dirname [info script]]]
 }
+
 puts "INFO: Creating new project in $dest_dir"
 
 # Set the project name
@@ -109,22 +110,25 @@ current_run -synthesis [get_runs synth_1]
 # Implementation configuration 
 # #############################################################################
 
+# Strategy and another optimization tasks
+set IMPLEMENT_STRATEGY "Performance_Explore"
+set IMPLEMENT_OPT_DESIGN_EN "1"
+
 # Create 'impl_1' run (if not found)
 if {[string equal [get_runs -quiet impl_1] ""]} {
-    create_run -name impl_1 -part xc7z020clg400-1 -flow {Vivado Implementation 2019} -strategy "Vivado Implementation Defaults" -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
+    create_run -name impl_1 -part xc7z020clg400-1 -flow {Vivado Implementation 2019} -strategy $IMPLEMENT_STRATEGY -report_strategy {No Reports} -constrset constrs_1 -parent_run synth_1
 } else {
-  set_property strategy "Vivado Implementation Defaults" [get_runs impl_1]
+  set_property strategy $IMPLEMENT_STRATEGY [get_runs impl_1]
   set_property flow "Vivado Implementation 2019" [get_runs impl_1]
 }
 
 set obj [get_runs impl_1]
-set_property -name "strategy" -value "Vivado Implementation Defaults" -objects $obj
-set_property -name "steps.phys_opt_design.is_enabled" -value "1" -objects $obj
+set_property -name "strategy" -value "Performance_Explore" -objects $obj
+set_property -name "steps.phys_opt_design.is_enabled" -value $IMPLEMENT_OPT_DESIGN_EN -objects $obj
 set_property -name "steps.write_bitstream.args.readback_file" -value "0" -objects $obj
-set_property -name "steps.write_bitstream.args.verbose" -value "0" -objects $obj
+set_property -name "steps.write_bitstream.args.verbose" -value "1" -objects $obj
 
 # set the current impl run
 current_run -implementation [get_runs impl_1]
 
-puts "INFO: Project created:${_xil_proj_name_}"
-
+puts "INFO: Project created:${_xil_proj_name_} !"
