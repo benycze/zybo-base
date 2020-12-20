@@ -98,7 +98,7 @@ set_property set_report_strategy_name 0 $obj
 current_run -synthesis [get_runs synth_1]
 
 # Make a wrapper of top-level design
-make_wrapper -files get_files -of_objects [get_filesets sources_1] [list "*src/bd/board_design/board_design.bd"] -top
+make_wrapper -files [get_files -of_objects [get_filesets sources_1] [list "*src/bd/board_design/board_design.bd"]] -top
 
 # #############################################################################
 # Implementation configuration 

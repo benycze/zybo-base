@@ -10,10 +10,16 @@ It can be also considered as tutorial for Zybo Z7-20 board (or Zynq based images
 ## How to Generate the Vivado Project
 
 The project for Vivado tool is initialized based on the `create_project.tcl` script. The project files are generated
-inside the `proj` folder by running of the following command:
+inside the `proj` folder by running of the following command (or run the `regenerate-project.sh` which also cleans the folder using git tool):
 
 ```bash
 vivado -mode batch -source create_project.tcl
+```
+
+or
+
+```bash
+./regenerate-project.sh
 ```
 
 After that, you can use the Vivado and open the `zybo-base.xpr` file. All source files, board designs, HDL and
