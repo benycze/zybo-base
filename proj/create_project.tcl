@@ -78,6 +78,14 @@ set constr_files [list \
 
 add_files -fileset constrs_1 $constr_files
 
+# Make a wrapper of top-level design and set is as a top
+add_files -norecurse [ \
+  make_wrapper -files [get_files -of_objects [get_filesets sources_1] [list "*src/bd/board_design/board_design.bd"]] -top -force
+]
+
+set obj [get_filesets sources_1]
+set_property "top" "board_design_wrapper" $obj
+
 # #############################################################################
 # Synthesis configuration 
 # #############################################################################
@@ -96,9 +104,6 @@ set_property set_report_strategy_name 0 $obj
 
 # set the current synth run
 current_run -synthesis [get_runs synth_1]
-
-# Make a wrapper of top-level design
-make_wrapper -files [get_files -of_objects [get_filesets sources_1] [list "*src/bd/board_design/board_design.bd"]] -top
 
 # #############################################################################
 # Implementation configuration 
