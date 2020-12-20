@@ -13,12 +13,6 @@ if {[info exists ::xsa_file]} {
 	set xsa_file [join [file normalize [file dirname [info script]]] "/board_design_wrapper.xsa"]
 }
 
-if {[info exists ::results_dir]} {
-	set results_dir $::results_dir
-} else {
-	set results_dir [join [file normalize [file dirname [info script]]] "/results"]
-}
-
 # Run the translation flow
 #
 # The project is preconfigured from the create_project.tcl script
