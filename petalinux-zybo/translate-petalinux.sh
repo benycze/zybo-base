@@ -68,6 +68,7 @@ petalinux-build
 echo "#####################################################"
 echo "Running the packaging ..."
 echo "#####################################################"
+petalinux-package --prebuilt --force --fpga images/linux/system.bit
 petalinux-package --boot --force --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot
 
 echo "#####################################################"
