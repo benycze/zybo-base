@@ -4,6 +4,7 @@ This repository contains the basic template which can be used for the template f
 It can be also considered as tutorial for Zybo Z7-20 board (or Zynq based images).
 
 **Required tools:**
+
 * Vivado 2019.2
 * Petalinux 2020.2
 
