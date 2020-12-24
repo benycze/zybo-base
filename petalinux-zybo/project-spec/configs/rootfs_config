@@ -100,7 +100,7 @@ CONFIG_system-zynq=y
 #
 # dnf
 #
-# CONFIG_dnf is not set
+CONFIG_dnf=y
 
 #
 # e2fsprogs 
@@ -128,7 +128,7 @@ CONFIG_system-zynq=y
 #
 # elfutils 
 #
-# CONFIG_elfutils is not set
+CONFIG_elfutils=y
 # CONFIG_libdw is not set
 # CONFIG_elfutils-dev is not set
 # CONFIG_elfutils-binutils is not set
@@ -156,7 +156,7 @@ CONFIG_haveged=y
 #
 # i2c-tools 
 #
-# CONFIG_i2c-tools is not set
+CONFIG_i2c-tools=y
 # CONFIG_i2c-tools-dev is not set
 # CONFIG_i2c-tools-dbg is not set
 # CONFIG_i2c-tools-misc is not set
@@ -179,7 +179,7 @@ CONFIG_haveged=y
 #
 # iproute2 
 #
-# CONFIG_iproute2 is not set
+CONFIG_iproute2=y
 # CONFIG_iproute2-tc is not set
 # CONFIG_iproute2-nstat is not set
 # CONFIG_iproute2-dev is not set
@@ -194,7 +194,7 @@ CONFIG_haveged=y
 #
 # kmod 
 #
-# CONFIG_kmod is not set
+CONFIG_kmod=y
 # CONFIG_kmod-dbg is not set
 # CONFIG_libkmod is not set
 # CONFIG_kmod-dev is not set
@@ -242,7 +242,7 @@ CONFIG_mtd-utils=y
 #
 # opkg-utils 
 #
-# CONFIG_opkg-utils is not set
+CONFIG_opkg-utils=y
 # CONFIG_update-alternatives-opkg is not set
 # CONFIG_opkg-utils-dbg is not set
 
@@ -345,7 +345,7 @@ CONFIG_mtd-utils=y
 #
 # util-linux 
 #
-# CONFIG_util-linux is not set
+CONFIG_util-linux=y
 # CONFIG_util-linux-dev is not set
 # CONFIG_util-linux-fsck.cramfs is not set
 # CONFIG_util-linux-swaponoff is not set
@@ -468,7 +468,7 @@ CONFIG_can-utils=y
 #
 # curl 
 #
-# CONFIG_curl is not set
+CONFIG_curl=y
 # CONFIG_curl-dev is not set
 # CONFIG_libcurl is not set
 # CONFIG_curl-dbg is not set
@@ -483,7 +483,7 @@ CONFIG_can-utils=y
 #
 # ethtool 
 #
-# CONFIG_ethtool is not set
+CONFIG_ethtool=y
 # CONFIG_ethtool-dbg is not set
 # CONFIG_ethtool-dev is not set
 
@@ -556,7 +556,7 @@ CONFIG_openssh-sftp-server=y
 #
 # rsync 
 #
-# CONFIG_rsync is not set
+CONFIG_rsync=y
 # CONFIG_rsync-dev is not set
 # CONFIG_rsync-dbg is not set
 
@@ -585,7 +585,7 @@ CONFIG_openssh-sftp-server=y
 #
 # wget 
 #
-# CONFIG_wget is not set
+CONFIG_wget=y
 # CONFIG_wget-dev is not set
 # CONFIG_wget-dbg is not set
 
@@ -596,7 +596,7 @@ CONFIG_openssh-sftp-server=y
 #
 # parted 
 #
-# CONFIG_parted is not set
+CONFIG_parted=y
 # CONFIG_parted-dbg is not set
 # CONFIG_parted-dev is not set
 
@@ -627,7 +627,7 @@ CONFIG_openssh-sftp-server=y
 #
 # bash-completion 
 #
-# CONFIG_bash-completion is not set
+CONFIG_bash-completion=y
 # CONFIG_bash-completion-dev is not set
 # CONFIG_bash-completion-extra is not set
 # CONFIG_bash-completion-dbg is not set
@@ -635,7 +635,7 @@ CONFIG_openssh-sftp-server=y
 #
 # bzip2 
 #
-# CONFIG_bzip2 is not set
+CONFIG_bzip2=y
 # CONFIG_libbz2 is not set
 # CONFIG_bzip2-dbg is not set
 # CONFIG_bzip2-dev is not set
@@ -643,28 +643,28 @@ CONFIG_openssh-sftp-server=y
 #
 # file 
 #
-# CONFIG_file is not set
+CONFIG_file=y
 # CONFIG_file-dbg is not set
 # CONFIG_file-dev is not set
 
 #
 # findutils 
 #
-# CONFIG_findutils is not set
+CONFIG_findutils=y
 # CONFIG_findutils-dbg is not set
 # CONFIG_findutils-dev is not set
 
 #
 # gawk 
 #
-# CONFIG_gawk is not set
+CONFIG_gawk=y
 # CONFIG_gawk-dbg is not set
 # CONFIG_gawk-dev is not set
 
 #
 # git 
 #
-# CONFIG_git is not set
+CONFIG_git=y
 # CONFIG_git-bash-completion is not set
 # CONFIG_gitweb is not set
 # CONFIG_git-perltools is not set
@@ -674,7 +674,7 @@ CONFIG_openssh-sftp-server=y
 #
 # grep 
 #
-# CONFIG_grep is not set
+CONFIG_grep=y
 # CONFIG_grep-dbg is not set
 # CONFIG_grep-dev is not set
 
@@ -688,7 +688,7 @@ CONFIG_openssh-sftp-server=y
 #
 # gzip 
 #
-# CONFIG_gzip is not set
+CONFIG_gzip=y
 # CONFIG_gzip-dbg is not set
 # CONFIG_gzip-dev is not set
 
@@ -703,7 +703,7 @@ CONFIG_openssh-sftp-server=y
 #
 # less 
 #
-# CONFIG_less is not set
+CONFIG_less=y
 # CONFIG_less-dev is not set
 # CONFIG_less-dbg is not set
 
@@ -717,19 +717,19 @@ CONFIG_openssh-sftp-server=y
 #
 # man 
 #
-# CONFIG_man is not set
+CONFIG_man=y
 
 #
 # man-pages 
 #
-# CONFIG_man-pages is not set
+CONFIG_man-pages=y
 # CONFIG_man-pages-dbg is not set
 # CONFIG_man-pages-dev is not set
 
 #
 # mc 
 #
-# CONFIG_mc is not set
+CONFIG_mc=y
 # CONFIG_mc-dev is not set
 # CONFIG_mc-helpers-perl is not set
 # CONFIG_mc-helpers is not set
@@ -755,21 +755,21 @@ CONFIG_pciutils=y
 #
 # screen 
 #
-# CONFIG_screen is not set
+CONFIG_screen=y
 # CONFIG_screen-dbg is not set
 # CONFIG_screen-dev is not set
 
 #
 # sed 
 #
-# CONFIG_sed is not set
+CONFIG_sed=y
 # CONFIG_sed-dbg is not set
 # CONFIG_sed-dev is not set
 
 #
 # setserial 
 #
-# CONFIG_setserial is not set
+CONFIG_setserial=y
 # CONFIG_setserial-dev is not set
 # CONFIG_setserial-dbg is not set
 
@@ -783,7 +783,7 @@ CONFIG_pciutils=y
 #
 # strace 
 #
-# CONFIG_strace is not set
+CONFIG_strace=y
 # CONFIG_strace-dev is not set
 # CONFIG_strace-dbg is not set
 
@@ -805,19 +805,19 @@ CONFIG_pciutils=y
 #
 # unzip 
 #
-# CONFIG_unzip is not set
+CONFIG_unzip=y
 # CONFIG_unzip-dbg is not set
 # CONFIG_unzip-dev is not set
 
 #
 # vim 
 #
-# CONFIG_vim is not set
-# CONFIG_vim-syntax is not set
+CONFIG_vim=y
+CONFIG_vim-syntax=y
 # CONFIG_vim-dev is not set
-# CONFIG_vim-help is not set
-# CONFIG_vim-common is not set
-# CONFIG_vim-vimrc is not set
+CONFIG_vim-help=y
+CONFIG_vim-common=y
+CONFIG_vim-vimrc=y
 # CONFIG_vim-tutor is not set
 # CONFIG_vim-tools is not set
 # CONFIG_vim-dbg is not set
@@ -3885,7 +3885,7 @@ CONFIG_tcpdump=y
 #
 # packagegroup-petalinux 
 #
-# CONFIG_packagegroup-petalinux is not set
+CONFIG_packagegroup-petalinux=y
 # CONFIG_packagegroup-petalinux-dev is not set
 # CONFIG_packagegroup-petalinux-dbg is not set
 
@@ -3920,7 +3920,7 @@ CONFIG_packagegroup-petalinux-lmsensors=y
 #
 # packagegroup-petalinux-networking-stack 
 #
-# CONFIG_packagegroup-petalinux-networking-stack is not set
+CONFIG_packagegroup-petalinux-networking-stack=y
 # CONFIG_packagegroup-petalinux-networking-stack-dbg is not set
 # CONFIG_packagegroup-petalinux-networking-stack-dev is not set
 
@@ -3941,7 +3941,7 @@ CONFIG_packagegroup-petalinux-lmsensors=y
 #
 # packagegroup-petalinux-opencv 
 #
-# CONFIG_packagegroup-petalinux-opencv is not set
+CONFIG_packagegroup-petalinux-opencv=y
 # CONFIG_packagegroup-petalinux-opencv-dbg is not set
 # CONFIG_packagegroup-petalinux-opencv-dev is not set
 
@@ -3977,14 +3977,14 @@ CONFIG_packagegroup-petalinux-lmsensors=y
 #
 # packagegroup-petalinux-updateboot 
 #
-# CONFIG_packagegroup-petalinux-updateboot is not set
+CONFIG_packagegroup-petalinux-updateboot=y
 # CONFIG_packagegroup-petalinux-updateboot-dbg is not set
 # CONFIG_packagegroup-petalinux-updateboot-dev is not set
 
 #
 # packagegroup-petalinux-utils 
 #
-# CONFIG_packagegroup-petalinux-utils is not set
+CONFIG_packagegroup-petalinux-utils=y
 # CONFIG_packagegroup-petalinux-utils-dbg is not set
 # CONFIG_packagegroup-petalinux-utils-dev is not set
 
@@ -4015,7 +4015,9 @@ CONFIG_packagegroup-petalinux-lmsensors=y
 CONFIG_imagefeature-ssh-server-dropbear=y
 # CONFIG_imagefeature-ssh-server-openssh is not set
 CONFIG_imagefeature-hwcodecs=y
-# CONFIG_imagefeature-package-management is not set
+CONFIG_imagefeature-package-management=y
+CONFIG_package-feed-uris=""
+CONFIG_package-feed-archs=""
 CONFIG_imagefeature-debug-tweaks=y
 # CONFIG_auto-login is not set
 
