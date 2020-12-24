@@ -102,6 +102,23 @@ petalinux-boot --jtag --prebuilt 3 --hw_server-url localhost:3121
 The serial line configuration is as same as in the case of SD card boot. I am recommending you to prepare the serial line
 berofe the running of petalinux-boot to see all messages. However, it should be fine to run the serial line after the petalinux command.
 
+You will see something like:
+
+```bash
+user@device $-> petalinux-boot --jtag --prebuilt 3 --hw_server-url 127.0.0.1:3121
+INFO: Sourcing build tools
+INFO: FPGA manager enabled, skipping bitstream to load in jtag...
+INFO: Append dtb - /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/system.dtb and other options to boot zImage
+INFO: Launching XSDB for file download and boot.
+INFO: This may take a few minutes, depending on the size of your image.
+INFO: Downloading ELF file: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/zynq_fsbl.elf to the target.
+INFO: Downloading ELF file: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/u-boot.elf to the target.
+INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/system.dtb at 0x00100000
+INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/uImage at 0x00200000
+INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/rootfs.cpio.gz.u-boot at 0x04000000
+
+```
+
 ### QEMU
 
 QEMU emulator is useful in the time of image preparation - you can also do some work without HW.
@@ -116,3 +133,19 @@ The meaning of prebuilt stages is following:
 * prebuilt 1 - boot includes FPGA bitstream programming
 * prebuilt 2 - bot includes U-BOOT stage
 * prebuilt 3 - boot includes a  Linux image (full system boot)
+
+## How to check the FPGA design
+
+Petalinux project is using the FPGA manager which allows you to load the FPGA bitstream after the boot. This can be useful if you
+want to debug HW via SSH (translate, prepare device tree and configuration). The generated petalinux is embedded with the
+`fpga-manager` from Xilinx which allows to program a bitstream and overlay device tree. Initial bitstream is inside the `/lib/firmware/`
+folder. To load the design you need to to:
+
+```bash
+fpgautil -b /lib/firmware/base/board_design_wrapper.bit.bin
+```
+
+Notice that if you want to load the design during the boot, disable the FPGA Manager functionality during the device import.
+
+After the successfull loading, you can use the `peek` and `poke` commands to read/write from the ARM address space. The address
+space also contains the PL (programmable logic) which starts on the 0x4000_0000 offset.
