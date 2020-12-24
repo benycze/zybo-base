@@ -26,14 +26,23 @@ After that, you can use the Vivado and open the `zybo-base.xpr` file. All source
 IP cores are under the `src` directory and they are included in the [create_project.tcl](proj/create_project.tcl)
 file. Therefore, edit this file if you want to version it and have a possibility to restore a project!
 
-There is also a helping (and simple) tcl script which can be used for the automatic export of HW design from the 
+There is also a helping (and simple) tcl script which can be used for the automatic export of HW design from the
 command line.
-It just opens the created project and runs syntheis, implementation, bitstream generation and HW export to 
+It just opens the created project and runs syntheis, implementation, bitstream generation and HW export to
 XSA file. All you have to do is to run the similar command like before:
 
 ```bash
 vivado -mode batch -source translate_project.tcl
 ```
+
+or
+
+```bash
+./translate-project.sh
+```
+
+Helping scripts are really small and they doesn't check if any file was modified. They are here just for the case that you
+don't want to write the command by hand.
 
 ## How to translate the Petalinux
 
