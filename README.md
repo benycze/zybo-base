@@ -139,10 +139,24 @@ The meaning of prebuilt stages is following:
 Petalinux project is using the FPGA manager which allows you to load the FPGA bitstream after the boot. This can be useful if you
 want to debug HW via SSH (translate, prepare device tree and configuration). The generated petalinux is embedded with the
 `fpga-manager` from Xilinx which allows to program a bitstream and overlay device tree. Initial bitstream is inside the `/lib/firmware/`
-folder. To load the design you need to to:
+folder. To load the design you need to to run the `fpgautil` command (the example output is also attached):
 
 ```bash
-fpgautil -b /lib/firmware/base/board_design_wrapper.bit.bin
+user@device $-> fpgautil -b /lib/firmware/base/board_design_wrapper.bit.bin
+fpga_manager fpga0: writing board_design_wrapper.bit.bin to Xilinx Zynq FPGA Manager
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /fpga-full/firmware-name
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay0
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay1
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/clocking0
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay2
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_gpio_led
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_gpio_sw
+OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_led_pwm
+GPIO IRQ not connected
+XGpio: gpio@41210000: registered, base is 902
+GPIO IRQ not connected
+XGpio: gpio@41200000: registered, base is 898
+
 ```
 
 Notice that if you want to load the design during the boot, disable the FPGA Manager functionality during the device import.
