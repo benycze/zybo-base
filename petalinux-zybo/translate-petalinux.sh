@@ -46,17 +46,17 @@ fi
 
 petalinux-config --get-hw-description ${XSA_FILE}
 
-echo "#####################################################"
-echo "Running the rootfs configuration..."
-echo "#####################################################"
 if [ ${rootfs_config} -eq 1 ]; then
+    echo "#####################################################"
+    echo "Running the rootfs configuration..."
+    echo "#####################################################"
     petalinux-config -c rootfs
 fi
 
-echo "#####################################################"
-echo "Running the kernel configuration ..."
-echo "#####################################################"
 if [ ${kernel_config} -eq 1 ]; then
+    echo "#####################################################"
+    echo "Running the kernel configuration ..."
+    echo "#####################################################"
     petalinux-config -c kernel
 fi
 
