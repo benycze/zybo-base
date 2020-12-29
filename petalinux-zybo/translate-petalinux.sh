@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+
+# -------------------------------------------------------------------------------
+#  PROJECT: Zybo Base
+# -------------------------------------------------------------------------------
+#  AUTHORS: Pavel Benacek <pavel.benacek@gmail.com>
+#  LICENSE: The MIT License (MIT), please read LICENSE file
+#  WEBSITE: https://github.com/benycze/zybo-base
+# -------------------------------------------------------------------------------
+
 set -e
 
 # Functions & code --------------------------------------------------------------

@@ -100,7 +100,7 @@ CONFIG_system-zynq=y
 #
 # dnf
 #
-CONFIG_dnf=y
+# CONFIG_dnf is not set
 
 #
 # e2fsprogs 
@@ -4026,6 +4026,11 @@ CONFIG_imagefeature-debug-tweaks=y
 #
 # CONFIG_gpio-demo is not set
 CONFIG_peekpoke=y
+
+#
+# modules 
+#
+CONFIG_led-module=y
 
 #
 # user packages 
