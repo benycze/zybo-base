@@ -23,7 +23,10 @@
 #include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/platform_device.h>
-
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/semaphore.h>
+#include <linux/uaccess.h>
 #include <linux/of_address.h>
 #include <linux/of_device.h>
 #include <linux/of_platform.h>
@@ -34,15 +37,25 @@
  * 
  */
 struct led_module_local {
-	unsigned long mem_start;	///< Start of IO memory
-	unsigned long mem_end;		///< End of IO memory
-	void __iomem *base_addr;	///< Base address of iomaped region
+	unsigned long 		mem_start;	/* Start of IO memory */
+	unsigned long 		mem_end;	/* End of IO memory */
+	void __iomem 		*base_addr;	/* < Base address of iomaped region */
+
+	struct class		*sysclass;	/* sysfs class for the device */
+	struct device		*device;	/* Allocated device structure */
+
+	dev_t				devid;		/* Allocated device ID for MAJOR and MINOR */
+	struct semaphore 	sem;		/* Semaphore for the mutual access to read/write */
+	struct cdev   		cdev; 		/* Characted device structure */
 };
 
 #define DRIVER_NAME "led_module"
-// We are able to work with four LEDs
+#define DRIVER_SYSFS_CLASS "led_module"
+#define DEVICE_ID_STR "led_module"
+
+/* We are able to work with four LEDs */
 #define LED_MASK 0xF
-// Helping constants
+/* Helping constants */
 #define LED_INIT_VALUE 0x0
 #define LED_OFFSET 0x0
 
@@ -53,11 +66,215 @@ struct led_module_local {
  * @param addr Destination address
  */
 static void write_led_data(u8 led_data, volatile void __iomem *addr) {
-	// Writeb function contains a __iowmb call, therefore we don't need
-	// to do any explicit wmb call
+	/* Writeb function contains a __iowmb call, therefore we don't need
+	 to do any explicit wmb call */
 	u8 write_data = led_data & LED_MASK;
 	writeb(write_data, addr);
 }
+
+/* ==================================================================
+ Char device callbacks
+   ================================================================== */
+
+static loff_t led_module_cdev_llseek(struct file *file, loff_t offset, int whence) {
+	/* Seeking in our case resets the device to default state because it doesn't remember 
+	all passed data */
+	struct led_module_local *lp;
+	loff_t rc;
+
+	lp = file->private_data;
+	if (!down_interruptible(&lp->sem)) {
+		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
+		return -ERESTARTSYS;
+	}
+
+	/* Restart the status and seek the offset based on whence */
+	write_led_data(LED_INIT_VALUE, LED_OFFSET);
+	switch (whence) {
+		case SEEK_SET: /* Set from the beginning */
+			rc = offset;
+			break;
+
+		case SEEK_CUR: /* Move current offset */
+			rc = file->f_pos + offset;
+			break;
+
+		default: /* This can never happen - like seeking at the end of the file in our case :-)*/
+			rc = -EINVAL;
+
+	}
+
+
+	cdev_llseek_out: 
+		up(&lp->sem);
+
+	return rc;
+}
+
+static ssize_t led_module_cdev_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos) {
+	/* It is not allowed to read any data there, thereofe we will return error but we shouldn't get there */
+	return -EFAULT;
+}
+
+static ssize_t led_module_cdev_write (struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
+	struct led_module_local *lp;
+	u8 idx;
+	unsigned long ncopied;
+	unsigned long to_copy;
+	ssize_t rc = 0;
+
+	// Set the buff size based on your requirements
+	size_t buff_size = 1;
+	u8 drv_buff[buff_size];
+
+	/* Try to lock the device, we need to exit if the process is waken up - we don't want to hang there */
+	lp = file->private_data;
+	if (!down_interruptible(&lp->sem)) {
+		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
+		return -ERESTARTSYS;
+	}
+
+	/* Get the data, write them to the device and update offsets, etc */
+	to_copy = buff_size;
+	if (count < buff_size) {
+		to_copy = count;
+	}
+
+	ncopied = copy_from_user(drv_buff, buff, to_copy);
+	if (ncopied < 0) {
+		dev_err(lp->device, "Cannot read data from the user space in cdev write routine.\n");
+		rc = -EFAULT;
+		goto cdev_write_out;
+	}
+
+	for (idx = 0; idx < to_copy; idx++) {
+		write_led_data(drv_buff[idx], LED_OFFSET);
+		*f_pos += 1;
+	}
+
+	/* Return the number of bytes we wrote to the LED device :-) */
+	rc = to_copy;
+
+	cdev_write_out: 
+		up(&lp->sem);
+
+	return rc;
+}
+
+static int led_module_cdev_open(struct inode *inode, struct file *filp) {
+	/* The driver there needs to check if the device was opened for writing, reading is not allowed there
+	because it doesn't make any sense to read how LEDs are shining. */
+	struct led_module_local *lp;
+
+	/* Get the local structure and store it into the file_private data for other calls */
+	lp = container_of(inode->i_cdev, struct led_module_local, cdev);
+	filp->private_data = lp;
+
+	/* Check if we are working with write_only, return error if not - defined in fnctl.h */
+	if ((filp->f_flags & O_ACCMODE) != O_WRONLY) {
+		dev_err(lp->device, "Device can be opened as WRITE ONLY!\n");
+		return -EPERM;
+	}
+
+	return 0;
+}
+
+static int led_module_cdev_release(struct inode *inode, struct file *filp) {
+	/* Nothing special to do here ... */
+	return 0;
+}
+
+/**
+ * @brief Structure with CDEV callbacks used by the
+ * kernel
+ * 
+ */
+struct file_operations fops = {
+	.owner = THIS_MODULE,
+	.llseek = led_module_cdev_llseek,
+	.read = led_module_cdev_read,
+	.write = led_module_cdev_write,
+	.open = led_module_cdev_open,
+	.release = led_module_cdev_release,
+};
+
+static int led_module_cdev_init(struct platform_device *pdev) {
+	int rc = 0;
+	struct device *dev = &pdev->dev;
+	struct led_module_local *lp = dev_get_drvdata(dev);
+	unsigned int n_major = 0;
+	unsigned int n_minor = 0;
+
+	dev_info(dev, "running the cdev init.\n");
+	/* Prepare the samaphore - one device is allowed to work with the
+	 led driver */
+	sema_init(&lp->sem, 1);
+
+	/* Dynamic allocation of Major number for the cdev */
+	rc = alloc_chrdev_region(&lp->devid, 0, 1, DRIVER_NAME);
+	if (rc < 0) {
+		dev_err(dev, "error during the MAJOR and MINOR allocation\n");
+		return rc;
+	}
+
+	n_major = MAJOR(lp->devid);
+	n_minor = MINOR(lp->devid);
+	dev_info(dev, "cdev init MAJOR=%d and MINOR=%d\n",n_major, n_minor);
+
+	/* create sysfs class to have easier access to it */
+    lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+	if (IS_ERR(lp->sysclass)) {
+		dev_err(dev, "error during the sysfs class creation\n");
+		rc = -EFAULT;
+		goto cdev_add_err;
+	}
+
+	/* Register the cdev into the kernel */
+	cdev_init(&lp->cdev, &fops);
+	lp->cdev.owner = THIS_MODULE;
+
+	rc = cdev_add(&lp->cdev, lp->devid, 1);
+	if (rc < 0)  {
+		dev_err(dev, "error during the cdev_add operation");
+		goto cdev_release_sysfsclass;
+	}
+
+	/* Create a device in /dev and register it to the sysfs */
+	lp->device = device_create(lp->sysclass, dev, lp->devid, NULL, DEVICE_ID_STR);
+	if(IS_ERR(lp->device)) {
+		dev_err(dev, "error during the device creation.\n");
+		rc = -EFAULT;
+		goto cdev_del_device;
+	}
+
+	return 0;
+
+	/* Error handlers */
+	cdev_del_device:
+		cdev_del(&lp->cdev);
+	cdev_release_sysfsclass:
+		class_destroy(lp->sysclass);
+		lp->sysclass = NULL;
+	cdev_add_err:
+		unregister_chrdev_region(lp->devid, 1);
+	return rc;
+}
+
+static void led_module_cdev_exit(struct platform_device *pdev) {
+	/* Deallocate already allocated structures */
+	struct device *dev = &pdev->dev;
+	struct led_module_local *lp = dev_get_drvdata(dev);
+	dev_info(dev, "Running the cdev exit");
+	device_destroy(lp->sysclass, lp->devid);
+	cdev_del(&lp->cdev);
+	class_destroy(lp->sysclass);
+	lp->sysclass = NULL;
+	unregister_chrdev_region(lp->devid, 1);
+}
+
+/* ==================================================================
+ Platform dependent callbacks
+   ================================================================== */
 
 static int led_module_probe(struct platform_device *pdev) {
 	struct resource *r_mem; /* IO mem resources */
@@ -104,6 +321,14 @@ static int led_module_probe(struct platform_device *pdev) {
 	dev_info(dev,"led-module at 0x%08x mapped to 0x%08x \n",
 		(unsigned int __force)lp->mem_start,
 		(unsigned int __force)lp->base_addr);
+
+	/* Register the CDEV, create device and sysfs */
+	rc = led_module_cdev_init(pdev);
+	if (rc < 0) {
+		dev_err(dev, "Unable to create a cdev.\n");
+		goto ioremap_err;
+	}
+	
 	return 0;
 
 ioremap_err:
@@ -117,7 +342,8 @@ mem_region_err:
 static int led_module_remove(struct platform_device *pdev) {
 	struct device *dev = &pdev->dev;
 	struct led_module_local *lp = dev_get_drvdata(dev);
-	dev_info(dev, "led-module is being removed.");
+	dev_info(dev, "led-module is being removed.\n");
+	led_module_cdev_exit(pdev);
 	iounmap(lp->base_addr);
 	release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
 	kfree(lp);
@@ -125,9 +351,14 @@ static int led_module_remove(struct platform_device *pdev) {
 	return 0;
 }
 
+/**
+ * @brief This function is called during the 
+ * 
+ * @param pdev pdev structure we are working with 
+ */
 static void led_module_shutdown(struct platform_device *pdev) {
 	write_led_data(LED_INIT_VALUE, LED_OFFSET);
-	dev_info(&pdev->dev, "led-module is shutting down.");
+	dev_info(&pdev->dev, "led-module is shutting down.\n");
 }
 
 static struct of_device_id led_module_of_match[] = {
