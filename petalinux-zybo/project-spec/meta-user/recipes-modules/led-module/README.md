@@ -1,6 +1,7 @@
 # PetaLinux LED module
 
-TODO: Driver description here
+The driver is implemented as character device where the writing is supported - we want to flash with 4xLED based on send characters :-).
+The device is also supporting the IOCTL for a direct access via the IOCTL call.
 
 ## Compilation
 

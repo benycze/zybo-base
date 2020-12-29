@@ -16,6 +16,7 @@
 *   with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
+
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -27,18 +28,42 @@
 #include <linux/of_device.h>
 #include <linux/of_platform.h>
 
-#define DRIVER_NAME "led-module"
-
+/**
+ * @brief Local structure with private module data used in all
+ * calls
+ * 
+ */
 struct led_module_local {
-	unsigned long mem_start;
-	unsigned long mem_end;
-	void __iomem *base_addr;
+	unsigned long mem_start;	///< Start of IO memory
+	unsigned long mem_end;		///< End of IO memory
+	void __iomem *base_addr;	///< Base address of iomaped region
 };
+
+#define DRIVER_NAME "led_module"
+// We are able to work with four LEDs
+#define LED_MASK 0xF
+// Helping constants
+#define LED_INIT_VALUE 0x0
+#define LED_OFFSET 0x0
+
+/**
+ * @brief Initial method for data writing into the HW
+ * 
+ * @param led_data LED data to write
+ * @param addr Destination address
+ */
+static void write_led_data(u8 led_data, volatile void __iomem *addr) {
+	// Writeb function contains a __iowmb call, therefore we don't need
+	// to do any explicit wmb call
+	u8 write_data = led_data & LED_MASK;
+	writeb(write_data, addr);
+}
 
 static int led_module_probe(struct platform_device *pdev) {
 	struct resource *r_mem; /* IO mem resources */
 	struct device *dev = &pdev->dev;
 	struct led_module_local *lp = NULL;
+	unsigned long mem_region_size = 0;
 
 	int rc = 0;
 	dev_info(dev, "Device Tree Probing\n");
@@ -56,7 +81,7 @@ static int led_module_probe(struct platform_device *pdev) {
 	dev_set_drvdata(dev, lp);
 	lp->mem_start = r_mem->start;
 	lp->mem_end = r_mem->end;
-	unsigned long mem_region_size = lp->mem_end - lp->mem_start + 1;
+	mem_region_size = lp->mem_end - lp->mem_start + 1;
 
 	/* Reserve the memory region acessed by the driver */
 	if (!request_mem_region(lp->mem_start,
@@ -101,12 +126,12 @@ static int led_module_remove(struct platform_device *pdev) {
 }
 
 static void led_module_shutdown(struct platform_device *pdev) {
-	// TODO: Implement write to offset here
+	write_led_data(LED_INIT_VALUE, LED_OFFSET);
 	dev_info(&pdev->dev, "led-module is shutting down.");
 }
 
 static struct of_device_id led_module_of_match[] = {
-	{ .compatible = "vendor,led-module", },
+	{ .compatible = "pb,led-module-1.0", },
 	{ /* end of list */ },
 };
 
@@ -121,11 +146,9 @@ static struct platform_driver led_module_driver = {
 	.shutdown   = led_module_shutdown,
 };
 
-module_platform_driver(led_module_driver)
+module_platform_driver(led_module_driver);
 
 /* Standard module information, edit as appropriate */
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR
-    ("Pavel Benacek");
-MODULE_DESCRIPTION
-    ("led-module - example module for LED device control");
+MODULE_AUTHOR("Pavel Benacek");
+MODULE_DESCRIPTION("led-module - example module for LED device control");
