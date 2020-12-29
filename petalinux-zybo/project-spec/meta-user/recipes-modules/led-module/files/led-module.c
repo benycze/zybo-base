@@ -101,13 +101,10 @@ static loff_t led_module_cdev_llseek(struct file *file, loff_t offset, int whenc
 
 		default: /* This can never happen - like seeking at the end of the file in our case :-)*/
 			rc = -EINVAL;
-
 	}
-
-
-	cdev_llseek_out: 
-		up(&lp->sem);
-
+	
+	/* Put the semaphore up and return the new llseek value */
+	up(&lp->sem);
 	return rc;
 }
 
