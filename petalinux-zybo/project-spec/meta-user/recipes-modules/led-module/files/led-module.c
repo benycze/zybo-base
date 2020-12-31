@@ -86,7 +86,7 @@ static loff_t led_module_cdev_llseek(struct file *file, loff_t offset, int whenc
 	loff_t rc;
 
 	lp = file->private_data;
-	if (!down_interruptible(&lp->sem)) {
+	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
 		return -ERESTARTSYS;
 	}
@@ -129,7 +129,7 @@ static ssize_t led_module_cdev_write (struct file *file, const char __user *buff
 
 	/* Try to lock the device, we need to exit if the process is waken up - we don't want to hang there */
 	lp = file->private_data;
-	if (!down_interruptible(&lp->sem)) {
+	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
 		return -ERESTARTSYS;
 	}
