@@ -51,7 +51,10 @@ struct led_module_local {
 
 #define DRIVER_NAME "led_module"
 #define DRIVER_SYSFS_CLASS "led_module"
-#define DEVICE_ID_STR "led_module"
+#define DEVICE_ID_STR "led_module-%d"
+
+/* Local driver buffer size */
+#define BUFF_SIZE 32
 
 /* We are able to work with four LEDs */
 #define LED_MASK 0xF
@@ -121,8 +124,8 @@ static ssize_t led_module_cdev_write (struct file *file, const char __user *buff
 	ssize_t rc = 0;
 
 	// Set the buff size based on your requirements
-	size_t buff_size = 1;
-	u8 drv_buff[buff_size];
+	size_t buff_size = BUFF_SIZE;
+	u8 drv_buff[BUFF_SIZE];
 
 	/* Try to lock the device, we need to exit if the process is waken up - we don't want to hang there */
 	lp = file->private_data;
@@ -237,7 +240,7 @@ static int led_module_cdev_init(struct platform_device *pdev) {
 	}
 
 	/* Create a device in /dev and register it to the sysfs */
-	lp->device = device_create(lp->sysclass, dev, lp->devid, NULL, DEVICE_ID_STR);
+	lp->device = device_create(lp->sysclass, dev, lp->devid, NULL, DEVICE_ID_STR, lp->devid);
 	if(IS_ERR(lp->device)) {
 		dev_err(dev, "error during the device creation.\n");
 		rc = -EFAULT;
