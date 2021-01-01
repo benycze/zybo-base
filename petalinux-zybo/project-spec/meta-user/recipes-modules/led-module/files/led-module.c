@@ -23,6 +23,8 @@
 #include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/platform_device.h>
+#include <linux/ioctl.h>
+#include <linux/capability.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/semaphore.h>
@@ -31,24 +33,15 @@
 #include <linux/of_device.h>
 #include <linux/of_platform.h>
 
-/**
- * @brief Local structure with private module data used in all
- * calls
- * 
- */
-struct led_module_local {
-	unsigned long 		mem_start;	/* Start of IO memory */
-	unsigned long 		mem_end;	/* End of IO memory */
-	void __iomem 		*base_addr;	/* < Base address of iomaped region */
+/* Declare IOCTL handlers */
+#define LED_IOCTL_MAGIC				'l'
+#define LED_IOCTL_GET_INIT 			_IOR(LED_IOCTL_MAGIC, 0, int)
+#define LED_IOCTL_SET_INIT			_IOW(LED_IOCTL_MAGIC, 1, int)
+#define LED_IOCTL_GET_MASK			_IOR(LED_IOCTL_MAGIC, 2, int)
+#define LED_IOCTL_SET_MASK			_IOW(LED_IOCTL_MAGIC, 3, int)
+#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 4)
 
-	struct class		*sysclass;	/* sysfs class for the device */
-	struct device		*device;	/* Allocated device structure */
-
-	dev_t				devid;		/* Allocated device ID for MAJOR and MINOR */
-	struct semaphore 	sem;		/* Semaphore for the mutual access to read/write */
-	struct cdev   		cdev; 		/* Characted device structure */
-};
-
+/* Configuration related to driver names, etc */
 #define DRIVER_NAME "led_module"
 #define DRIVER_SYSFS_CLASS "led_module"
 #define DEVICE_ID_STR "led_module-%d"
@@ -57,42 +50,127 @@ struct led_module_local {
 #define BUFF_SIZE 32
 
 /* We are able to work with four LEDs */
-#define LED_MASK 0xF
+#define LED_INIT_MASK 0xF
 /* Helping constants */
 #define LED_INIT_VALUE 0x0
 #define LED_OFFSET 0x0
+
+/**
+ * @brief Structure with driver settings relate to the HW
+ * 
+ */
+struct led_io_config {
+	u8 led_mask_val;	/* Mask used during the IO write - default value is LED_INIT_MASK */
+	u8 led_init_val; 	/* Initial value used during the reset - default value is LED_INIT_VALUE */
+};
+
+/**
+ * @brief Local structure with private module data used in all
+ * calls
+ * 
+ */
+struct led_module_local {
+	unsigned long 			mem_start;		/* Start of IO memory */
+	unsigned long 			mem_end;		/* End of IO memory */
+	void __iomem 			*base_addr;		/* Base address of iomaped region */
+
+	struct class			*sysclass;		/* sysfs class for the device */
+	struct device			*device;		/* Allocated device structure */
+
+	dev_t					devid;			/* Allocated device ID for MAJOR and MINOR */
+	struct semaphore 		sem;			/* Semaphore for the mutual access to read/write */
+	struct cdev   			cdev; 			/* Characted device structure */
+
+	struct led_io_config	led_io_conf;	/* Configuration of the LED driver */
+};
 
 /**
  * @brief Initial method for data writing into the HW
  * 
  * @param led_data LED data to write
  * @param addr Destination address
+ * @param Mask used for the IO operation
  */
-static void write_led_data(u8 led_data, volatile void __iomem *addr) {
+static void write_led_data(u8 led_data, volatile void __iomem *addr, u8 mask) {
 	/* Writeb function contains a __iowmb call, therefore we don't need
 	 to do any explicit wmb call */
-	u8 write_data = led_data & LED_MASK;
+	u8 write_data = led_data & mask;
 	writeb(write_data, addr);
 }
 
 /* ==================================================================
- Char device callbacks
+ 		Char device callbacks
    ================================================================== */
+
+static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
+	struct led_module_local *lp;
+	struct led_io_config	*lc;
+	long rc;
+
+	lp = file->private_data;
+	lc = &lp->led_io_conf;
+	rc = 0;
+
+	if (down_interruptible(&lp->sem)) {
+		dev_err(lp->device, "Cannot acquire the device, it is being used by a different process.\n");
+		return -ERESTARTSYS;
+	}
+
+	/* Generally, we allow to read data without a superuser account.
+	Writing is, on the other hand allowed to the owner of the device or
+	to a user which has the SYSADMIN capability.
+	
+	The we are returning the value by a pointer passed via the \p arg argument
+	*/
+	switch (cmd) {
+	case LED_IOCTL_GET_INIT:
+		rc = put_user(lc->led_init_val, (u8 __user*) arg);
+		break;
+	case LED_IOCTL_SET_INIT:
+		if(!capable(CAP_SYS_ADMIN)) {
+			return -EPERM;
+		}
+		rc = get_user(lc->led_init_val, (u8 __user*) arg);
+		break;
+	case LED_IOCTL_GET_MASK:
+		rc = put_user(lc->led_mask_val, (u8 __user*) arg);
+		break;
+	case LED_IOCTL_SET_MASK:
+		if(!capable(CAP_SYS_ADMIN)) {
+			return -EPERM;
+		}
+		rc = get_user(lc->led_mask_val, (u8 __user*) arg);
+		break;
+	case LED_IOCTL_RESET:
+		write_led_data(lc->led_init_val, LED_OFFSET, lc->led_mask_val);
+		rc = 0;
+		break;
+	default:
+		dev_info(lp->device, "Invalid ioctl cmd = 0x%08x\n", cmd);
+		rc = -ENOTTY;
+		break;
+	}
+
+	up(&lp->sem);
+	return rc;
+}
 
 static loff_t led_module_cdev_llseek(struct file *file, loff_t offset, int whence) {
 	/* Seeking in our case resets the device to default state because it doesn't remember 
 	all passed data */
 	struct led_module_local *lp;
+	struct led_io_config *lc;
 	loff_t rc;
 
 	lp = file->private_data;
+	lc = &lp->led_io_conf;
 	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
 		return -ERESTARTSYS;
 	}
 
 	/* Restart the status and seek the offset based on whence */
-	write_led_data(LED_INIT_VALUE, LED_OFFSET);
+	write_led_data(lc->led_init_val, LED_OFFSET, lc->led_mask_val);
 	switch (whence) {
 		case SEEK_SET: /* Set from the beginning */
 			rc = offset;
@@ -118,17 +196,18 @@ static ssize_t led_module_cdev_read(struct file *file, char __user *buff, size_t
 
 static ssize_t led_module_cdev_write (struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
 	struct led_module_local *lp;
+	struct led_io_config 	*lc;
 	u8 idx;
-	unsigned long ncopied;
 	unsigned long to_copy;
 	ssize_t rc = 0;
 
-	// Set the buff size based on your requirements
+	/* Set the buff size based on your requirements */
 	size_t buff_size = BUFF_SIZE;
 	u8 drv_buff[BUFF_SIZE];
 
 	/* Try to lock the device, we need to exit if the process is waken up - we don't want to hang there */
 	lp = file->private_data;
+	lc = &lp->led_io_conf;
 	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
 		return -ERESTARTSYS;
@@ -140,15 +219,16 @@ static ssize_t led_module_cdev_write (struct file *file, const char __user *buff
 		to_copy = count;
 	}
 
-	ncopied = copy_from_user(drv_buff, buff, to_copy);
-	if (ncopied < 0) {
+	/* Copy data from the user space, the function returns 0 iff all data were copied from the
+	  user space */
+	if (copy_from_user(drv_buff, buff, to_copy)) {
 		dev_err(lp->device, "Cannot read data from the user space in cdev write routine.\n");
 		rc = -EFAULT;
 		goto cdev_write_out;
 	}
 
 	for (idx = 0; idx < to_copy; idx++) {
-		write_led_data(drv_buff[idx], LED_OFFSET);
+		write_led_data(drv_buff[idx], LED_OFFSET, lc->led_mask_val);
 		*f_pos += 1;
 	}
 
@@ -196,6 +276,7 @@ struct file_operations fops = {
 	.write = led_module_cdev_write,
 	.open = led_module_cdev_open,
 	.release = led_module_cdev_release,
+	.unlocked_ioctl = led_module_ioctl,
 };
 
 static int led_module_cdev_init(struct platform_device *pdev) {
@@ -273,7 +354,7 @@ static void led_module_cdev_exit(struct platform_device *pdev) {
 }
 
 /* ==================================================================
- Platform dependent callbacks
+ 		Platform dependent callbacks
    ================================================================== */
 
 static int led_module_probe(struct platform_device *pdev) {
@@ -299,6 +380,10 @@ static int led_module_probe(struct platform_device *pdev) {
 	lp->mem_start = r_mem->start;
 	lp->mem_end = r_mem->end;
 	mem_region_size = lp->mem_end - lp->mem_start + 1;
+
+	/* Setup LED IO structure with default value */
+	lp->led_io_conf.led_init_val = LED_INIT_VALUE;
+	lp->led_io_conf.led_mask_val = LED_INIT_MASK;
 
 	/* Reserve the memory region acessed by the driver */
 	if (!request_mem_region(lp->mem_start,
@@ -357,7 +442,11 @@ static int led_module_remove(struct platform_device *pdev) {
  * @param pdev pdev structure we are working with 
  */
 static void led_module_shutdown(struct platform_device *pdev) {
-	write_led_data(LED_INIT_VALUE, LED_OFFSET);
+	struct device			*dev = &pdev->dev;
+	struct led_module_local *lp = dev_get_drvdata(dev);
+	struct led_io_config	*lc = &lp->led_io_conf;
+
+	write_led_data(lc->led_init_val, LED_OFFSET, lc->led_mask_val);
 	dev_info(&pdev->dev, "led-module is shutting down.\n");
 }
 

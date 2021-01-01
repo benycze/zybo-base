@@ -3,6 +3,21 @@
 The driver is implemented as character device where the writing is supported - we want to flash with 4xLED based on send characters :-).
 The device is also supporting the IOCTL for a direct access via the IOCTL call.
 
+The IOCTL commands are following:
+
+* Set/Get initial value
+* Set/Get initial mask value (mask is used during IO operation when data are "ANDed" with mask)
+* Reset the device
+
+```
+#define LED_IOCTL_MAGIC				'l'
+#define LED_IOCTL_GET_INIT 			_IOR(LED_IOCTL_MAGIC, 0, int)
+#define LED_IOCTL_SET_INIT			_IOW(LED_IOCTL_MAGIC, 1, int)
+#define LED_IOCTL_GET_MASK			_IOR(LED_IOCTL_MAGIC, 2, int)
+#define LED_IOCTL_SET_MASK			_IOW(LED_IOCTL_MAGIC, 3, int)
+#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 4)
+```
+
 ## Compilation
 
 The "all:" target in the Makefile template will compile compile the module.
