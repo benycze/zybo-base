@@ -92,10 +92,13 @@ struct led_module_local {
  * @param Mask used for the IO operation
  */
 static void write_led_data(u8 led_data, volatile void __iomem *addr, u8 mask) {
-	/* Writeb function contains a __iowmb call, therefore we don't need
-	 to do any explicit wmb call */
+	/* The ARM version is using the WBM before any IO operation, the WMB is inserted
+	if you want to port it on different device */
 	u8 write_data = led_data & mask;
-	writeb(write_data, addr);
+	iowrite8(write_data, addr);
+	#if !defined(CONFIG_ARM)
+	wmb();
+	#endif
 }
 
 /* ==================================================================
