@@ -163,3 +163,91 @@ Notice that if you want to load the design during the boot, disable the FPGA Man
 
 After the successfull loading, you can use the `peek` and `poke` commands to read/write from the ARM address space. The address
 space also contains the PL (programmable logic) which starts on the 0x4000_0000 offset.
+
+## How to debug the Linux Kernel
+
+The simplest possibility is to use the [KGDB](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/gdb-kernel-debugging.html#:~:text=The%20kernel%20debugger%20kgdb%2C%20hypervisors,simplify%20typical%20kernel%20debugging%20steps.) approach which is known quite well from the
+Linux world. First of all, we need to configure the kernel. To achieve this, run the
+`petalinux-config -c kernel` and set the following variables (everything is in the
+`Kernel hacking` submenu).
+
+* CONFIG_GDB_SCRIPTS
+* CONFIG_CONSOLE_POLL
+* CONFIG_KGDB
+* CONFIG_KGDB_SERIAL_CONSOLE
+
+We need to translate the serial console multiplexer because we are going to debug
+and control the board via the same serial line. Linux world has a great tool which
+handles this. The code of this tool is located inside the `util/proxy-agent` directory.
+Enter the directory and translate it using the `make` command. We will use the translated
+tool in next steps :-).
+
+The kernel parameters are configured to wait on the KGDB (if translated) connection.
+Another kernel parameters can be configured via the `petalinux-configure` command.
+
+Translate the kernel and boot it (via JTAG or SD card). We need to enter the directory
+where the kernel was translated (because of the GDB scripts are located there).
+
+Now, we need to setup the debug and communication session via the `proxy-agent` tool.
+The following command creates two slots for communication (5550) and gdb debug (5551)
+via the serial line `/dev/ttyUSB1` with baudrate 115200 (you can also check opened
+ports via the `ss` tool).
+
+```bash
+ ./agent-proxy 5550^5551 0 /dev/ttyUSB1,115200 
+```
+
+We can connect to communication terminal using the `telnet` command:
+
+```bash
+telnet localhost 5550
+```
+
+Now, we need to run the debug session of the kernel. This is achieved in two steps:
+
+* Enabling the debug session via the sysfs on the debugged target - `echo ttyPS0 > /sys/module/kgdboc/parameters/kgdboc`
+* Connection to the debug session via the GBD
+
+### Connection to debug session
+
+The first mentioned command will enable the debug session via the ttyPS0 serial line.
+You will see something like this:
+
+```bash
+[   60.352486] KGDB: Registered I/O driver kgdboc
+[   60.372279] KGDB: Waiting for connection from remote gdb...
+```
+
+The first half of the process is done. Now, we need to enter the build directory
+of the kernel and start the debug session inside the `gdb` tool. The build folder has
+path like this `build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4+git999-r0/linux-xlnx-5.4+git999` (correct this for your translation, you can also look for the
+`config` file. The following command opens the translated `vmlinux` file. After that,
+we need to use the target remote localhost:5551 to connect to the debug session:
+
+```bash
+arm-linux-gnueabihf-gdb ./vmlinux
+GNU gdb (GDB) 8.3.1
+Copyright (C) 2019 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=x86_64-petalinux-linux --target=arm-xilinx-linux-gnueabi".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./vmlinux...
+(gdb) target remote localhost:5551
+Remote debugging using localhost:5551
+arch_kgdb_breakpoint ()
+    at /home/jeremy/zybo-base.git/petalinux-zybo/components/yocto/workspace/sources/linux-xlnx/arch/arm/include/asm/kgdb.h:46
+46		asm(__inst_arm(0xe7ffdeff));
+(gdb) 
+```
+
+We are done! You can insert breakpoints and debug the kernel and your modules :-).
