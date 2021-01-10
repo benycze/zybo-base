@@ -221,7 +221,7 @@ You will see something like this:
 The first half of the process is done. Now, we need to enter the build directory
 of the kernel and start the debug session inside the `gdb` tool. The build folder has
 path like this `build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4+git999-r0/linux-xlnx-5.4+git999` (correct this for your translation, you can also look for the
-`config` file. The following command opens the translated `vmlinux` file. After that,
+`.config` file. The following command opens the translated `vmlinux` file. After that,
 we need to use the target remote localhost:5551 to connect to the debug session:
 
 ```bash
