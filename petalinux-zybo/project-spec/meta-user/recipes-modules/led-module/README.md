@@ -15,7 +15,8 @@ The IOCTL commands are following:
 #define LED_IOCTL_SET_INIT			_IOW(LED_IOCTL_MAGIC, 1, int)
 #define LED_IOCTL_GET_MASK			_IOR(LED_IOCTL_MAGIC, 2, int)
 #define LED_IOCTL_SET_MASK			_IOW(LED_IOCTL_MAGIC, 3, int)
-#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 4)
+#define LED_IOCTL_SET_VALUE			_IOW(LED_IOCTL_MAGIC, 4, int)
+#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 5)
 ```
 
 ## Compilation

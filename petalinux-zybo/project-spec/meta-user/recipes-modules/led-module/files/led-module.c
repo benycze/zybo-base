@@ -39,7 +39,8 @@
 #define LED_IOCTL_SET_INIT			_IOW(LED_IOCTL_MAGIC, 1, int)
 #define LED_IOCTL_GET_MASK			_IOR(LED_IOCTL_MAGIC, 2, int)
 #define LED_IOCTL_SET_MASK			_IOW(LED_IOCTL_MAGIC, 3, int)
-#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 4)
+#define LED_IOCTL_SET_VALUE			_IOW(LED_IOCTL_MAGIC, 4, int)
+#define LED_IOCTL_RESET				_IO(LED_IOCTL_MAGIC, 5)
 
 /* Configuration related to driver names, etc */
 #define DRIVER_NAME "led_module"
@@ -108,6 +109,7 @@ static void write_led_data(u8 led_data, volatile void __iomem *addr, u8 mask) {
 static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
 	struct led_module_local *lp;
 	struct led_io_config	*lc;
+	u8 set_val;
 	long rc;
 
 	lp = file->private_data;
@@ -130,7 +132,7 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		rc = put_user(lc->led_init_val, (u8 __user*) arg);
 		break;
 	case LED_IOCTL_SET_INIT:
-		if(!capable(CAP_SYS_ADMIN)) {
+		if (!capable(CAP_SYS_ADMIN)) {
 			return -EPERM;
 		}
 		rc = get_user(lc->led_init_val, (u8 __user*) arg);
@@ -139,13 +141,24 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		rc = put_user(lc->led_mask_val, (u8 __user*) arg);
 		break;
 	case LED_IOCTL_SET_MASK:
-		if(!capable(CAP_SYS_ADMIN)) {
+		if (!capable(CAP_SYS_ADMIN)) {
 			return -EPERM;
 		}
 		rc = get_user(lc->led_mask_val, (u8 __user*) arg);
 		break;
+	case LED_IOCTL_SET_VALUE:
+		if (!capable(CAP_SYS_ADMIN)) {
+			return -EPERM;
+		}
+		rc = get_user(set_val, (u8 __user*) arg);
+		if (!rc) return rc;
+
+		/* So far so good, set the LED based on value */
+		write_led_data(set_val, lp->base_addr + LED_OFFSET, lc->led_mask_val);
+
+		break;
 	case LED_IOCTL_RESET:
-		write_led_data(lc->led_init_val, LED_OFFSET, lc->led_mask_val);
+		write_led_data(lc->led_init_val, lp->base_addr + LED_OFFSET, lc->led_mask_val);
 		rc = 0;
 		break;
 	default:
@@ -233,7 +246,7 @@ static ssize_t led_module_cdev_write(struct file *file, const char __user *buff,
 	for (idx = 0; idx < to_copy; idx++) {
 		/* Skip null charactets new lines and null characters */
 		if (drv_buff[idx] != '\0' &&  drv_buff[idx] != '\n') {
-				(drv_buff[idx], lp->base_addr + LED_OFFSET, lc->led_mask_val);
+			write_led_data(drv_buff[idx], lp->base_addr + LED_OFFSET, lc->led_mask_val);
 		}
 
 		*f_pos += 1;
