@@ -1,6 +1,6 @@
 /*  led-module.c - Example device driver for the LED device
 
-* Copyright (C) 2013 - 2016 Pavel Benacek
+* Copyright (C) 2020 Pavel Benacek
 *
 *   This program is free software; you can redistribute it and/or modify
 *   it under the terms of the GNU General Public License as published by
@@ -193,8 +193,8 @@ static loff_t led_module_cdev_llseek(struct file *file, loff_t offset, int whenc
 }
 
 static ssize_t led_module_cdev_read(struct file *file, char __user *buff, size_t count, loff_t *f_pos) {
-	/* It is not allowed to read any data there, thereofe we will return error but we shouldn't get there */
-	return -EFAULT;
+	/* The module returns end-of-file, it is not allowed to read any data */
+	return 0;
 }
 
 static ssize_t led_module_cdev_write(struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
@@ -256,12 +256,6 @@ static int led_module_cdev_open(struct inode *inode, struct file *filp) {
 	/* Get the local structure and store it into the file_private data for other calls */
 	lp = container_of(inode->i_cdev, struct led_module_local, cdev);
 	filp->private_data = lp;
-
-	/* Check if we are working with write_only, return error if not - defined in fnctl.h */
-	if ((filp->f_flags & O_ACCMODE) != O_WRONLY) {
-		dev_err(lp->device, "Device can be opened as WRITE ONLY!\n");
-		return -EPERM;
-	}
 
 	return 0;
 }
