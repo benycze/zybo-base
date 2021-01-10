@@ -231,10 +231,11 @@ static ssize_t led_module_cdev_write(struct file *file, const char __user *buff,
 	}
 
 	for (idx = 0; idx < to_copy; idx++) {
-		/* Skip null charactets */
-		if (drv_buff[idx] == '\0') continue;
+		/* Skip null charactets new lines and null characters */
+		if (drv_buff[idx] != '\0' &&  drv_buff[idx] != '\n') {
+				(drv_buff[idx], lp->base_addr + LED_OFFSET, lc->led_mask_val);
+		}
 
-		write_led_data(drv_buff[idx], lp->base_addr + LED_OFFSET, lc->led_mask_val);
 		*f_pos += 1;
 	}
 

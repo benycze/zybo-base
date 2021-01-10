@@ -251,3 +251,14 @@ arch_kgdb_breakpoint ()
 ```
 
 We are done! You can insert breakpoints and debug the kernel and your modules :-).
+
+First of all, you have to be sure that the kernel module is compiled with -O0 and -g options. After that, you need to determine where the module is loaded.
+This can be done via `cat /proc/modules` command on the debugged machine. After that you have to add the symbol file in the `gbd` instance.
+The example for the mapping is: `add-symbol-file ../../project-spec/meta-user/recipes-modules/led-module/files/led-module.ko 0xbf005000`.
+After that, you can run all the gdb commands as usually :-).
+
+Some helping hints:
+
+* If you want to go back to the debug console - go to the remote target and run `echo g > /proc/sysrq-trigger`
+* You can create a `.gdbinit` file with symbol file loading but be aware of the situation that base linux module address can change between runs
+* Minimize the size of the image to load it faster during the debug. This image is larger because you may use it for a different purposes :-)

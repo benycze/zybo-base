@@ -18,7 +18,7 @@ CC=$(CROSS_COMPILE)gcc
 KERNEL_SRC=${PROJ_ROOT}/build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4*/linux-xlnx*/
 # Makefile body ###############################################################
 # Put all default flags here
-MY_CFLAGS += -g 
+MY_CFLAGS += -g -O0
 
 obj-m := led-module.o
 ccflags-y += ${MY_CFLAGS}
