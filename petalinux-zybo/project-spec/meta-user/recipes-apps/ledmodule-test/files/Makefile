@@ -6,18 +6,6 @@
 #  WEBSITE: https://github.com/benycze/zybo-base
 # -------------------------------------------------------------------------------
 
-###############################################################################
-# Export helping variables for the compilation via Makefile
-## Root of the project
-PROJ_ROOT=$(shell pwd)/../../../../..
-# Cross compilation settings
-export ARCH=arm
-export CROSS_COMPILE:=arm-linux-gnueabihf-
-
-CC=$(CROSS_COMPILE)gcc
-
-###############################################################################
-
 APP = ledmodule-test
 
 # Add any other object files to this list below
