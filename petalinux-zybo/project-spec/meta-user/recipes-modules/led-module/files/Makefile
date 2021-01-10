@@ -15,10 +15,10 @@ export ARCH=arm
 export CROSS_COMPILE:=arm-linux-gnueabihf-
 
 CC=$(CROSS_COMPILE)gcc
-KERNEL_SRC=${PROJ_ROOT}/build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4*/linux-zynq_generic-standard-build/
+KERNEL_SRC=${PROJ_ROOT}/build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4*/linux-xlnx*/
 # Makefile body ###############################################################
 # Put all default flags here
-MY_CFLAGS +=
+MY_CFLAGS += -g 
 
 obj-m := led-module.o
 ccflags-y += ${MY_CFLAGS}

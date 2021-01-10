@@ -197,7 +197,7 @@ static ssize_t led_module_cdev_read(struct file *file, char __user *buff, size_t
 	return -EFAULT;
 }
 
-static ssize_t led_module_cdev_write (struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
+static ssize_t led_module_cdev_write(struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
 	struct led_module_local *lp;
 	struct led_io_config 	*lc;
 	u8 idx;
@@ -231,7 +231,7 @@ static ssize_t led_module_cdev_write (struct file *file, const char __user *buff
 	}
 
 	for (idx = 0; idx < to_copy; idx++) {
-		write_led_data(drv_buff[idx], LED_OFFSET, lc->led_mask_val);
+		write_led_data(drv_buff[idx], lp->base_addr + LED_OFFSET, lc->led_mask_val);
 		*f_pos += 1;
 	}
 
@@ -449,12 +449,12 @@ static void led_module_shutdown(struct platform_device *pdev) {
 	struct led_module_local *lp = dev_get_drvdata(dev);
 	struct led_io_config	*lc = &lp->led_io_conf;
 
-	write_led_data(lc->led_init_val, LED_OFFSET, lc->led_mask_val);
+	write_led_data(lc->led_init_val,  lp->base_addr + LED_OFFSET, lc->led_mask_val);
 	dev_info(&pdev->dev, "led-module is shutting down.\n");
 }
 
 static struct of_device_id led_module_of_match[] = {
-	{ .compatible = "pb,led-module-1.0", },
+	{ .compatible = "pb,ledmodule-1.0", },
 	{ /* end of list */ },
 };
 
