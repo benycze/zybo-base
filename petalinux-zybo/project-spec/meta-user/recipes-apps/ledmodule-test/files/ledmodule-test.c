@@ -55,8 +55,9 @@ static void print_help() {
 }
 
 static void wait_for_key_press() {
-    printf("Press any key to continue ...\n");
-    getchar();
+    int ch;
+    printf("Press enter key to continue ...\n");
+    while ((ch = getchar()) != '\n') {};
     return;
 }
 
@@ -75,12 +76,12 @@ static void print_box(const char* msg) {
 static int test_ioctl_init(int fd) {
     int rc;
     int ioctl_ret;
-    const int ref_val = 0x2;
+    const int ref_val = 0xf;
 
     print_box("Starting the IOCTL INIT test");
     printf("Trying to set the INIT value...\n");
     rc = ioctl(fd, LED_IOCTL_SET_INIT, ref_val);
-    if (!rc) {
+    if (rc) {
         printf("Unable to set the INIT value!\n");
         return RET_ERR;
     }
@@ -88,14 +89,14 @@ static int test_ioctl_init(int fd) {
 
 
     rc = ioctl(fd, LED_IOCTL_GET_INIT, &ioctl_ret);
-    if (!rc) {
+    if (rc) {
         printf("Unable to get the INIT value!\n");
         return RET_ERR;
     }
-    printf("Init value received from the device ...");
+    printf("Init value received from the device ...\n");
     
     if (ioctl_ret != ref_val) {
-        printf("Expected value (%x) and received (%x) are not same!", ioctl_ret, ref_val);
+        printf("Expected value (%x) and received (%x) are not same!\n", ioctl_ret, ref_val);
         return RET_ERR;
     }
 
@@ -107,11 +108,12 @@ static int test_ioctl_mask(int fd) {
     int rc;
     int ioctl_ret;
     const int ref_val = 0x3;
+    const int def_val = 0xf;
 
     print_box("Starting the IOCTL MASK test");
     printf("Trying to set the MASK value...\n");
     rc = ioctl(fd, LED_IOCTL_SET_MASK, ref_val);
-    if (!rc) {
+    if (rc) {
         printf("Unable to set the MASK value!\n");
         return RET_ERR;
     }
@@ -119,18 +121,25 @@ static int test_ioctl_mask(int fd) {
 
 
     rc = ioctl(fd, LED_IOCTL_GET_MASK, &ioctl_ret);
-    if (!rc) {
+    if (rc) {
         printf("Unable to get the MASK value!\n");
         return RET_ERR;
     }
-    printf("Mask value received from the device ...");
+    printf("Mask value received from the device ..\n");
     
     if (ioctl_ret != ref_val) {
-        printf("Expected value (%x) and received (%x) are not same!", ioctl_ret, ref_val);
+        printf("Expected value (%x) and received (%x) are not same!\n", ioctl_ret, ref_val);
         return RET_ERR;
     }
 
     printf("Wow, IOCLT MASK is working!!!\n\n");
+    printf("Running the mask reset...");
+    rc = ioctl(fd, LED_IOCTL_SET_MASK, def_val);
+    if(rc) {
+        printf("Unable to reset the MASK value!\n");
+        return RET_ERR;
+    }
+
     return RET_OK;
 }
 
@@ -146,7 +155,7 @@ static int test_ioctl_blink(int fd) {
     for (idx = 0; idx < test_data_count; idx++) {
         printf("\t* Writing %x\n", test_data[idx]);
         rc = ioctl(fd, LED_IOCTL_SET_VALUE, test_data[idx]);
-        if (!rc) {
+        if (rc) {
             printf("Error during the IOCTL set operation!\n");
             return RET_ERR;
         }
@@ -155,7 +164,7 @@ static int test_ioctl_blink(int fd) {
 
     printf("Trying to reset the device ...\n");
     rc = ioctl(fd, LED_IOCTL_RESET);
-    if (!rc) {
+    if (rc) {
         printf("Unable to reset the device!\n");
         return RET_ERR;
     }
@@ -166,8 +175,8 @@ static int test_ioctl_blink(int fd) {
 /* Standard test of the classic fwrite test */
 
 static int device_write_test(FILE* f) {
-    const char* test_string  = "abc1";
-    int test_size = strnlen(test_string, 5);
+    const char* test_string  = "abc1330";
+    int test_size = strnlen(test_string, 32);
 
     int rc;
     // Setup helping variables to stream write
@@ -204,6 +213,11 @@ int main(int argc, char **argv) {
                 printf("Unknown option %s\n", optopt);
                 return RET_ERR;
         }
+    }
+
+    if (dev == NULL) {
+        printf("Device wasn't selected\n");
+        return RET_ERR;
     }
 
     printf("Welcome the to the test utility for the LED module device driver.\n");

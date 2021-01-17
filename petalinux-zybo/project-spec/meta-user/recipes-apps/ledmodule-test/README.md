@@ -11,3 +11,9 @@ To compile it locally, run the following command:
 ```bash
 make CC=arm-linux-gnueabihf-gcc
 ```
+
+or for debug
+
+```bash
+make CC=arm-linux-gnueabihf-gcc CFLAGS="-g -O0"
+```

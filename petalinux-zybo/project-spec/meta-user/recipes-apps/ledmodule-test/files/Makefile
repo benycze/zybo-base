@@ -16,7 +16,7 @@ all: print_config build
 build: print_config $(APP)
 
 $(APP): print_config $(APP_OBJS)
-	$(CC) -o $@ $(APP_OBJS) $(LDFLAGS) $(LDLIBS)
+	$(CC) ${CFLAGS}  -o $@ $(APP_OBJS) $(LDFLAGS) $(LDLIBS)
 
 clean:
 	rm -f $(APP) *.o
@@ -25,6 +25,7 @@ print_config:
 	@echo "#######################################################"
 	@echo "Using the following configuration"
 	@echo " * CC = ${CC}"
+	@echo " * CFLAGS = ${CFLAGS}"
 	@echo " * LDFLAGS = ${LDFLAGS}"
 	@echo " * LDLIBS = ${LDLIBS}"
 	@echo "#######################################################"
