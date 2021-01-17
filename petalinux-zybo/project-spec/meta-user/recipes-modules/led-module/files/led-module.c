@@ -106,10 +106,15 @@ static void write_led_data(u8 led_data, volatile void __iomem *addr, u8 mask) {
  		Char device callbacks
    ================================================================== */
 
+#ifdef DEBUG
+	#define IOCTL_DEBUG_PRINT(dev,args...) {dev_info(dev,args);}
+#else
+	#define IOCTL_DEBUG_PRINT(dev,args...) {}
+#endif
+
 static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
 	struct led_module_local *lp;
 	struct led_io_config	*lc;
-	u8 set_val;
 	long rc;
 
 	lp = file->private_data;
@@ -121,6 +126,7 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		return -ERESTARTSYS;
 	}
 
+	IOCTL_DEBUG_PRINT(lp->device, "IOCLT Handler has been called - cmd = 0x%x , arg = 0x%lx\n", cmd, arg);
 	/* Generally, we allow to read data without a superuser account.
 	Writing is, on the other hand allowed to the owner of the device or
 	to a user which has the SYSADMIN capability.
@@ -129,36 +135,45 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 	*/
 	switch (cmd) {
 	case LED_IOCTL_GET_INIT:
-		rc = put_user(lc->led_init_val, (u8 __user*) arg);
+		rc = put_user(lc->led_init_val, (int __user*) arg);
+		IOCTL_DEBUG_PRINT(lp->device, "Sending the init value 0x%x (rc = %ld)\n",lc->led_init_val,rc);
 		break;
 	case LED_IOCTL_SET_INIT:
 		if (!capable(CAP_SYS_ADMIN)) {
+			IOCTL_DEBUG_PRINT(lp->device,"User is not capable to set the init value\n");
 			return -EPERM;
 		}
-		rc = get_user(lc->led_init_val, (u8 __user*) arg);
+		lc->led_init_val = arg;
+		rc = 0;
+		IOCTL_DEBUG_PRINT(lp->device, "Setting the init value 0x%x (rc = %ld)\n",lc->led_init_val,rc);
 		break;
 	case LED_IOCTL_GET_MASK:
-		rc = put_user(lc->led_mask_val, (u8 __user*) arg);
+		rc = put_user(lc->led_mask_val, (int __user*) arg);
+		IOCTL_DEBUG_PRINT(lp->device, "Sending the mask value 0x%x (rc = %ld)\n",lc->led_mask_val,rc);
 		break;
 	case LED_IOCTL_SET_MASK:
 		if (!capable(CAP_SYS_ADMIN)) {
+			IOCTL_DEBUG_PRINT(lp->device,"User is not capable to set the mask value\n");
 			return -EPERM;
 		}
-		rc = get_user(lc->led_mask_val, (u8 __user*) arg);
+		rc = 0;
+		lc->led_mask_val = arg;
+		IOCTL_DEBUG_PRINT(lp->device, "Setting the init value 0x%x (rc = %ld)\n",lc->led_mask_val,rc);
 		break;
 	case LED_IOCTL_SET_VALUE:
 		if (!capable(CAP_SYS_ADMIN)) {
+			IOCTL_DEBUG_PRINT(lp->device,"User is not capable to set led value\n");
 			return -EPERM;
 		}
-		rc = get_user(set_val, (u8 __user*) arg);
-		if (!rc) return rc;
-
+		rc = 0;
+		IOCTL_DEBUG_PRINT(lp->device, "Received the led value 0x%lx (rc = %ld)\n",arg,rc);
 		/* So far so good, set the LED based on value */
-		write_led_data(set_val, lp->base_addr + LED_OFFSET, lc->led_mask_val);
+		write_led_data(arg, lp->base_addr + LED_OFFSET, lc->led_mask_val);
 
 		break;
 	case LED_IOCTL_RESET:
 		write_led_data(lc->led_init_val, lp->base_addr + LED_OFFSET, lc->led_mask_val);
+		IOCTL_DEBUG_PRINT(lp->device, "Resetting the LED value\n");
 		rc = 0;
 		break;
 	default:
@@ -167,6 +182,7 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		break;
 	}
 
+	IOCTL_DEBUG_PRINT(lp->device, "IOCLT Handler has been finished (rc = %ld)\n", rc);
 	up(&lp->sem);
 	return rc;
 }

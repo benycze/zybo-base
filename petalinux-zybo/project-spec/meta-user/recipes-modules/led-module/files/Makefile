@@ -18,7 +18,7 @@ CC=$(CROSS_COMPILE)gcc
 KERNEL_SRC=$(shell dirname `find ${PROJ_ROOT}/build/tmp/work/ -name .config`)
 # Makefile body ###############################################################
 # Put all default flags here
-MY_CFLAGS += -g -O0
+MY_CFLAGS += -g -O0 -DDEBUG
 
 obj-m := led-module.o
 ccflags-y += ${MY_CFLAGS}
