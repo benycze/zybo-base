@@ -4027,15 +4027,18 @@ CONFIG_imagefeature-debug-tweaks=y
 # CONFIG_gpio-demo is not set
 CONFIG_ledmodule-test=y
 CONFIG_peekpoke=y
+# CONFIG_switchmodule-test is not set
 
 #
 # modules 
 #
 CONFIG_led-module=y
+CONFIG_switch-module=y
 
 #
 # user packages 
 #
+CONFIG_dtc=y
 
 #
 # PetaLinux RootFS Settings
