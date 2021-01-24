@@ -57,7 +57,7 @@ int sig_int = 0;
  * 
  * @param s Signal value
  */
-void sig_handler(sig_t s){
+void sig_handler(int s){
     sig_int = 1;
 }
 
@@ -134,7 +134,7 @@ static int ioctl_loop_read(int fd) {
         rc = ioctl(fd, SW_IOCTL_GET_VALUE, &sw_val);
         if(rc) {
             printf("Unable to read the current switch value!\n");
-            signal(SIGINT, SIG_IGN);
+            signal(SIGINT, SIG_DFL);
             return RET_ERR;
         }
 
@@ -143,7 +143,7 @@ static int ioctl_loop_read(int fd) {
     }
 
     // Unregister & end
-    signal(SIGINT, SIG_IGN);
+    signal(SIGINT, SIG_DFL);
     return RET_OK;
 }
 
