@@ -126,7 +126,7 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		return -ERESTARTSYS;
 	}
 
-	IOCTL_DEBUG_PRINT(lp->device, "IOCLT Handler has been called - cmd = 0x%x , arg = 0x%lx\n", cmd, arg);
+	IOCTL_DEBUG_PRINT(lp->device, "IOCTL Handler has been called - cmd = 0x%x , arg = 0x%lx\n", cmd, arg);
 	/* Generally, we allow to read data without a superuser account.
 	Writing is, on the other hand allowed to the owner of the device or
 	to a user which has the SYSADMIN capability.
@@ -441,11 +441,14 @@ static int led_module_probe(struct platform_device *pdev) {
 	rc = led_module_cdev_init(pdev);
 	if (rc < 0) {
 		dev_err(dev, "Unable to create a cdev.\n");
-		goto ioremap_err;
+		goto cdev_init_err;
 	}
 	
 	return 0;
 
+cdev_init_err:
+	led_module_cdev_exit(pdev);
+	iounmap(lp->base_addr);
 ioremap_err:
 	release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
 mem_region_err:
