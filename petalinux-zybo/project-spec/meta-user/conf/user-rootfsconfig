@@ -5,3 +5,4 @@ CONFIG_gpio-demo
 CONFIG_peekpoke
 CONFIG_led-module
 CONFIG_ledmodule-test
+CONFIG_switch-module
