@@ -261,4 +261,4 @@ Some helping hints:
 
 * If you want to go back to the debug console - go to the remote target and run `echo g > /proc/sysrq-trigger`
 * You can create a `.gdbinit` file with symbol file loading but be aware of the situation that base linux module address can change between runs
-* Minimize the size of the image to load it faster during the debug. This image is larger because you may use it for a different purposes :-)
+* Minimize the size of the image to load it faster during the debug. This image is larger because you may use it for different purposes :-)
