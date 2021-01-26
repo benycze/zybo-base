@@ -218,7 +218,7 @@ static ssize_t switch_module_cdev_read(struct file *file, char __user *buff, siz
 
 static ssize_t switch_module_cdev_write(struct file *file, const char __user *buff, size_t count, loff_t *f_pos) {
 	/* It is not allowed to write into the device */
-	return -EFAULT;
+	return -EINVAL;
 }
 
 static int switch_module_cdev_open(struct inode *inode, struct file *filp) {
@@ -231,10 +231,10 @@ static int switch_module_cdev_open(struct inode *inode, struct file *filp) {
 	filp->private_data = lp;
 
 	/* Check we opened the device read only */
-	if ((filp->f_flags & O_ACCMODE) != O_RDONLY) {
-		dev_err(lp->device, "Device can be opened in the read-only mode.\n");
-		return -EPERM;
-	}
+	//if ((filp->f_flags & O_ACCMODE) != O_RDONLY) {
+	//	dev_err(lp->device, "Device can be opened in the read-only mode.\n");
+	//	return -EPERM;
+	//}
 
 	return 0;
 }
