@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
 
 /* Declare IOCTL handlers */
 #define SW_IOCTL_MAGIC			'l'
@@ -66,13 +67,6 @@ static void print_help() {
     printf("\n\n");
     printf("\t-h = prints this help\n");
     printf("\t-d = device to open\n");
-    return;
-}
-
-static void wait_for_key_press() {
-    int ch;
-    printf("Press enter key to continue ...\n");
-    while ((ch = getchar()) != '\n') {};
     return;
 }
 
@@ -139,10 +133,10 @@ static int ioctl_loop_read(int fd) {
         }
 
         printf("Current value: 0x%x\n", sw_val);
-        wait_for_key_press();
+        sleep(1);
     }
-
     // Unregister & end
+    printf("Loop read has been finished.\n");
     signal(SIGINT, SIG_DFL);
     return RET_OK;
 }
