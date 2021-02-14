@@ -40,7 +40,7 @@
 
 /* PWM configuration & address space */
 #define PWM_PERIOD_CLK 		4096
-#define PWM_MAX_DIV			2
+#define PWM_MAX_DIV			8
 
 #define PWM_AXI_CTRL_REG_OFFSET 	0
 #define PWM_AXI_PERIOD_REG_OFFSET 	8
@@ -58,7 +58,7 @@
 
 /* Othe configuration */
 #define BUFF_SIZE			512
-#define BUFF_CONF_STR_LEN	14
+#define BUFF_CONF_STR_LEN	15
 
 /**
  * @brief Decoded RGB values
@@ -115,8 +115,8 @@ struct rgb_led_module_local {
 	struct rgb_val		rgbval;		/* Current set RGB value */
 	u32	period;						/* PWM period value */
 
-	u8 dev_buff[BUFF_SIZE];			/* Device buffer */
-	u8 rd_buff[BUFF_SIZE];			/* Device read buffer */
+	char wr_buf[BUFF_SIZE];			/* Device buffer */
+	char rd_buff[BUFF_SIZE];		/* Device read buffer */
 };
 
 /* ==================================================================
@@ -356,12 +356,15 @@ static ssize_t rgb_module_cdev_read(struct file *file, char __user *buff, size_t
 	 * output string iff the current offset is 0.
 	 */
 	size_t rc;
-	struct rgb_led_module_local *lp = file->private_data;
-	const struct rgb_val *rgb_val = &lp->rgbval;
-	char *buff_start = NULL;
+	struct rgb_led_module_local *lp;
+	const struct rgb_val *rgb_val;
+	char *buff_start;
 	size_t to_send;
 
 	/* Acquire the lock and prepare data */
+	buff_start = NULL;
+	lp = file->private_data;
+	rgb_val = &lp->rgbval;
 	rc = 0;
 	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
@@ -370,7 +373,7 @@ static ssize_t rgb_module_cdev_read(struct file *file, char __user *buff, size_t
 	}
 
 	if (*f_pos == 0) {
-		snprintf("0x%2x 0x%2x 0x%2x", BUFF_SIZE, lp->rd_buff,
+		snprintf(lp->rd_buff, BUFF_SIZE, "0x%x 0x%x 0x%x\n",
 			rgb_val->r, rgb_val->g, rgb_val->b);
 	}
 
@@ -413,10 +416,12 @@ static ssize_t rgb_module_cdev_write(struct file *file, const char __user *buff,
 	size_t rem_buff;
 	int matched;
 	int str_len;
-	struct rgb_val rgb_conf = {0, 0, 0};
-	struct rgb_led_module_local *lp = file->private_data;
+	char *buff_start;
+	struct rgb_led_module_local *lp;
+	struct rgb_val rgb_conf;
 
 	/* Get the semaphore and receive user data */
+	lp = file->private_data;
 	rc = 0;
 	if (down_interruptible(&lp->sem)) {
 		dev_err(lp->device, "Cannot acquire the device, it is used by a different process.\n");
@@ -433,7 +438,8 @@ static ssize_t rgb_module_cdev_write(struct file *file, const char __user *buff,
 		to_copy = count;
 	}
 
-	if (copy_from_user(lp->dev_buff + *f_pos, buff, to_copy)) {
+	buff_start = lp->wr_buf + *f_pos;
+	if (copy_from_user(buff_start, buff, to_copy)) {
 		dev_err(lp->device, "Cannot read data from the user space in cdev write routine.\n");
 		rc = -EFAULT;
 		goto rgb_write_end;
@@ -441,7 +447,7 @@ static ssize_t rgb_module_cdev_write(struct file *file, const char __user *buff,
 
 	/* Parse input if we have enough of data  - format is 0xAA 0xBB 0xCC */
 	rc = to_copy;
-	str_len = strnlen(lp->dev_buff, BUFF_SIZE);
+	str_len = strnlen(lp->wr_buf, BUFF_SIZE);
 	if (str_len < BUFF_CONF_STR_LEN) {
 		/* Don't have enough data - skip to end*/
 		goto rgb_write_end;
@@ -451,12 +457,14 @@ static ssize_t rgb_module_cdev_write(struct file *file, const char __user *buff,
 		/* More data than needed, report the error */
 		dev_err(lp->device, "More data than needed the format is: 0xAA 0xBB 0xCC \n");
 		rc = -EINVAL;
+		/* Initialize the buffer */
 		goto rgb_write_end;
 	}
 
 	/* Match Input data and configure the device */
-	matched = sscanf(lp->rd_buff, "%2x %2x %2x*",
+	matched = sscanf(lp->wr_buf, "%x %x %x\n",
 		&rgb_conf.r, &rgb_conf.g, &rgb_conf.b);
+
 	if (matched != 3) {
 		/* Invalid format of config data */
 		dev_err(lp->device, "Invalid format of configuration data. Allowed format is: 0xAA 0xBB 0xCC \n");
