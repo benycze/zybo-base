@@ -195,7 +195,7 @@ static ssize_t switch_module_cdev_read(struct file *file, char __user *buff, siz
 	bf_start = lp->loc_buff + *f_pos;
 	ret = strnlen(bf_start, BUFF_SIZE);
 	if (ret == 0) {
-		// We don't have nothing to send
+		/* We don't have nothing to send */
 		up(&lp->sem);
 		return 0;
 	}

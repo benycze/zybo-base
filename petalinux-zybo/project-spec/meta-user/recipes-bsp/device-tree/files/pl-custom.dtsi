@@ -14,3 +14,6 @@
     compatible = "pb,swmodule-1.0";
 };
 
+&axi_led_pwm {
+    compatible = "pb,rgb-led-module-1.0";
+};

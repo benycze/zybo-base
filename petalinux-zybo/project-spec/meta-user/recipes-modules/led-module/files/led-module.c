@@ -177,12 +177,12 @@ static long led_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		rc = 0;
 		break;
 	default:
-		dev_info(lp->device, "Invalid ioctl cmd = 0x%08x\n", cmd);
+		dev_info(lp->device, "Invalid IOCTL cmd = 0x%08x\n", cmd);
 		rc = -ENOTTY;
 		break;
 	}
 
-	IOCTL_DEBUG_PRINT(lp->device, "IOCLT Handler has been finished (rc = %ld)\n", rc);
+	IOCTL_DEBUG_PRINT(lp->device, "IOCTL Handler has been finished (rc = %ld)\n", rc);
 	up(&lp->sem);
 	return rc;
 }

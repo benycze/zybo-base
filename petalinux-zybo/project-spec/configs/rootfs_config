@@ -4033,6 +4033,7 @@ CONFIG_switchmodule-test=y
 # modules 
 #
 CONFIG_led-module=y
+CONFIG_rgb-led-module=y 
 CONFIG_switch-module=y
 
 #
