@@ -9,3 +9,4 @@ CONFIG_switch-module
 CONFIG_dtc
 CONFIG_switchmodule-test
 CONFIG_rgb-led-module
+CONFIG_rgb-led-test

@@ -4027,6 +4027,7 @@ CONFIG_imagefeature-debug-tweaks=y
 # CONFIG_gpio-demo is not set
 CONFIG_ledmodule-test=y
 CONFIG_peekpoke=y
+CONFIG_rgb-led-test=y
 CONFIG_switchmodule-test=y
 
 #
