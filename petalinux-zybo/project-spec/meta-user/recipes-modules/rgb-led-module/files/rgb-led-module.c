@@ -267,7 +267,7 @@ static long rgb_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 	switch (cmd) {
 	case LED_IOCTL_GET_VAL:
 		tmp_val = encode_rgb(&lp->rgbval);
-		rc = put_user(tmp_val, (unsigned u32 __user*) arg);
+		rc = put_user(tmp_val, (u32 __user*) arg);
 		IOCTL_DEBUG_PRINT(lp->device, "Sending the RGB value 0x%lx (rc = %ld)\n", tmp_val, rc);
 		break;
 
@@ -277,7 +277,7 @@ static long rgb_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 			return -EPERM;
 		}
 
-		rc = get_user(tmp_val, (unsigned u32 __user*) arg);
+		rc = get_user(tmp_val, (u32 __user*) arg);
 		if (rc != 0) {
 			IOCTL_DEBUG_PRINT(lp->device,"Cannot copy value from user space.\n");
 			break;
@@ -289,7 +289,7 @@ static long rgb_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		break;
 
 	case LED_IOCTL_GET_PERIOD:
-		rc = put_user(lp->period, (unsigned u32 __user*) arg);
+		rc = put_user(lp->period, (u32 __user*) arg);
 		IOCTL_DEBUG_PRINT(lp->device, "Sending the RGB value 0x%x (rc = %ld)\n", lp->period, rc);
 		break;
 
@@ -299,7 +299,7 @@ static long rgb_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 			return -EPERM;
 		}
 		
-		rc = get_user(lp->period, (unsigned u32 __user*) arg);
+		rc = get_user(lp->period, (u32 __user*) arg);
 		if (rc != 0) {
 			IOCTL_DEBUG_PRINT(lp->device,"Cannot copy value from user space.\n");
 			break;
