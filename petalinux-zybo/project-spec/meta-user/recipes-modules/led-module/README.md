@@ -29,11 +29,11 @@ simply run the command.
     "petalinux-build -c led-module" to build the module
 
 You can also compile the module out of the petalinux tool. All you have to do is to run the `make` command which
-which runs the cross compilation with arm-linux-gnueabihf- toolchain. You can also select the new toolachain via `ARCH` and `CROSS_COMPILE`
+which runs the cross compilation with arm-xilinx-linux-gnueabi toolchain. You can also select the new toolachain via `ARCH` and `CROSS_COMPILE`
 variables. Additional compilation variables are taken via `MY_CFLAGS` variable. So, to run a different cross compilation with debug symbols run:
 
 ```bash
-make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- MY_CFLAGS="-g -O0 -DDEBUG"
+make MY_CFLAGS="-g -O0 -DDEBUG"
 ```
 
 ## Device Tree

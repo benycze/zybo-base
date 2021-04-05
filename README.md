@@ -225,7 +225,7 @@ path like this `build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4+
 we need to use the target remote localhost:5551 to connect to the debug session:
 
 ```bash
-arm-linux-gnueabihf-gdb ./vmlinux
+arm-xilinx-linux-gnueabi-gdb ./vmlinux
 GNU gdb (GDB) 8.3.1
 Copyright (C) 2019 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
@@ -262,3 +262,14 @@ Some helping hints:
 * If you want to go back to the debug console - go to the remote target and run `echo g > /proc/sysrq-trigger`
 * You can create a `.gdbinit` file with symbol file loading but be aware of the situation that base linux module address can change between runs
 * Minimize the size of the image to load it faster during the debug. This image is larger because you may use it for different purposes :-)
+
+## How to obtain the Xilinx build toolchain
+
+The toolchain can be accessed via the Petalinux SDK. You have to do the following:
+
+```bash
+cd petalinux-zybo
+./source-toolchain.sh
+```
+
+The sourcing script checks if the the SDK is available and it also builds it for you if not.

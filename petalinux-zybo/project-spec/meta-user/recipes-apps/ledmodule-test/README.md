@@ -9,11 +9,11 @@ The binary accepts the path to the char device in `/dev` folder
 To compile it locally, run the following command:
 
 ```bash
-make CC=arm-linux-gnueabihf-gcc
+make
 ```
 
 or for debug
 
 ```bash
-make CC=arm-linux-gnueabihf-gcc CFLAGS="-g -O0"
+make CFLAGS="-g -O0"
 ```

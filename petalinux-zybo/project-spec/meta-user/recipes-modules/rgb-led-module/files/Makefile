@@ -12,8 +12,7 @@
 PROJ_ROOT=$(shell pwd)/../../../../..
 # Cross compilation settings
 export ARCH=arm
-export CROSS_COMPILE:=arm-linux-gnueabihf-
-
+export CROSS_COMPILE:=arm-xilinx-linux-gnueabi-
 CC=$(CROSS_COMPILE)gcc
 KERNEL_SRC=$(shell dirname `find ${PROJ_ROOT}/build/tmp/work/ -name .config`)
 # Makefile body ###############################################################
