@@ -174,8 +174,8 @@ static int test_ioctl_blink(int fd) {
 
 /* Standard test of the classic fwrite test */
 
-static int device_write_test(FILE* f) {
-    const char* test_string  = "abc1330";
+static int device_write_test(int fd) {
+    const char* test_string  = "abc13302";
     int test_size = strnlen(test_string, 32);
 
     int rc;
@@ -184,8 +184,9 @@ static int device_write_test(FILE* f) {
     int to_write = test_size;
         
     print_box("Starting the standard write operation to cdev\n");
+    printf("Test string: %s\n", test_string);
     while (to_write > 0) {
-        rc = fwrite(ptr, sizeof(char), to_write, f);
+        rc = write(fd, ptr, to_write);
         if (rc == 0) {
             printf("Unable to write data to device!\n");
             return RET_ERR;
@@ -231,20 +232,11 @@ int main(int argc, char **argv) {
     CHECK_FUNC(test_ioctl_init(fd), close(fd));  
     CHECK_FUNC(test_ioctl_mask(fd), close(fd));
     CHECK_FUNC(test_ioctl_blink(fd), close(fd));
-    close(fd);
-    fd = 0;
 
     wait_for_key_press();
     printf("So far so good, time to write something via the char driver.\n\n");
-    FILE* f = fopen(dev, "w");
-    if (!f) {
-        printf("Unable to open device %s for writing\n.", dev);
-        return RET_ERR;
-    } 
-
-    CHECK_FUNC(device_write_test, fclose(f));
-    fclose(f);
-    f = NULL;
+    CHECK_FUNC(device_write_test(fd), close(fd));
+    close(fd);
 
     return RET_OK;
 }
