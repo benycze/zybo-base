@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
     printf("So far so good, time to write something via the char driver.\n\n");
     CHECK_FUNC(test_device_write(fd), close(fd));
 
-    printf("Everything done. Running the device reset.");
+    printf("Everything done. Running the device reset.\n");
     CHECK_FUNC(reset_device(fd), close(fd));
     close(fd);
     fd = 0;
