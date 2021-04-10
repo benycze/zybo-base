@@ -29,6 +29,7 @@
 #define LED_IOCTL_SET_VAL		_IOW(LED_IOCTL_MAGIC, 1, unsigned long)
 #define LED_IOCTL_SET_PERIOD	_IOW(LED_IOCTL_MAGIC, 2, unsigned long)
 #define LED_IOCTL_GET_PERIOD	_IOR(LED_IOCTL_MAGIC, 3, unsigned long)
+#define LED_IOCTL_INIT			_IO (LED_IOCTL_MAGIC, 4)
 
 /* Some helping macros */
 #define RET_OK 0
@@ -125,10 +126,10 @@ static void print_rgb(__u32 val) {
 static int test_ioctl_blink(int fd) {
     // Hex value is the encoded RGB 
     const __u32 rgb_test[] = {
-        0xFF0000, // RED
-        0x00FF00, // GREEN
-        0x0000FF, // BLUE
         0xFF00FF, // PURPLE
+        0xFF0000, // RED
+        0x0000FF, // BLUE
+        0x00FF00, // GREEN
     };
 
     print_box("RGB LED test");
@@ -158,6 +159,9 @@ static int test_ioctl_blink(int fd) {
             printf("Expected: "); print_rgb(rgb_test[i]); printf("\n");
             return RET_ERR;
         }
+
+        printf("Check the LED if color matches ...\n");
+        wait_for_key_press();
     }
 
     printf("RGB test has been finished.\n");
@@ -167,18 +171,17 @@ static int test_ioctl_blink(int fd) {
 
 /* Standard test of the classic fwrite test */
 
-static int device_write_test(FILE* f) {
-    const char* test_string  = "0xff00ff";
+static int  test_device_write(int fd) {
+    const char* test_string  = "0xff 0x00 0x00\n";
     int test_size = strnlen(test_string, 32);
 
     int rc;
     // Setup helping variables to stream write
     const char* ptr = test_string;
     int to_write = test_size;
-        
-    print_box("Starting the standard write operation to cdev (writing GREEN color)\n");
+    print_box("Starting the standard write operation to cdev (writing RED color)\n");
     while (to_write > 0) {
-        rc = fwrite(ptr, sizeof(char), to_write, f);
+        rc = write(fd, ptr, to_write);
         if (rc == 0) {
             printf("Unable to write data to device!\n");
             return RET_ERR;
@@ -189,7 +192,20 @@ static int device_write_test(FILE* f) {
         to_write    -= rc;
     }
 
+    printf("Written string: %s\n", test_string);
+    printf("Check if the color is RED ...\n");
+    wait_for_key_press();
 
+    return RET_OK;
+}
+
+int reset_device(int fd) {
+    print_box("Device reset");
+    int rc = ioctl(fd, LED_IOCTL_INIT, 0);
+    if (rc) {
+        printf("Error during the device reset!\n");
+        return RET_ERR;
+    }
     return RET_OK;
 }
 
@@ -223,20 +239,14 @@ int main(int argc, char **argv) {
     }
     CHECK_FUNC(test_ioctl_blink(fd), close(fd));
     CHECK_FUNC(test_ioctl_period(fd), close(fd));
+
+    printf("So far so good, time to write something via the char driver.\n\n");
+    CHECK_FUNC(test_device_write(fd), close(fd));
+
+    printf("Everything done. Running the device reset.");
+    CHECK_FUNC(reset_device(fd), close(fd));
     close(fd);
     fd = 0;
-
-    wait_for_key_press();
-    printf("So far so good, time to write something via the char driver.\n\n");
-    FILE* f = fopen(dev, "w");
-    if (!f) {
-        printf("Unable to open device %s for writing\n.", dev);
-        return RET_ERR;
-    } 
-
-    CHECK_FUNC(device_write_test, fclose(f));
-    fclose(f);
-    f = NULL;
 
     return RET_OK;
 }
