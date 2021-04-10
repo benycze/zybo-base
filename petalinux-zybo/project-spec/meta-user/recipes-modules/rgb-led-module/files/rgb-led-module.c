@@ -55,6 +55,7 @@
 #define LED_IOCTL_SET_VAL		_IOW(LED_IOCTL_MAGIC, 1, unsigned long)
 #define LED_IOCTL_SET_PERIOD	_IOW(LED_IOCTL_MAGIC, 2, unsigned long)
 #define LED_IOCTL_GET_PERIOD	_IOR(LED_IOCTL_MAGIC, 3, unsigned long)
+#define LED_IOCTL_INIT			_IO (LED_IOCTL_MAGIC, 4)
 
 /* Othe configuration */
 #define BUFF_SIZE			512
@@ -308,6 +309,11 @@ static long rgb_module_ioctl(struct file *file, unsigned int cmd, unsigned long 
 		IOCTL_DEBUG_PRINT(lp->device, "Setting the period value 0x%x (rc = %ld)\n", lp->period, rc);
 		break;
 
+	case LED_IOCTL_INIT:
+		IOCTL_DEBUG_PRINT(lp->device, "Reseting the device to initial values");
+		init_device(lp);
+		break;
+
 	default:
 		dev_info(lp->device, "Invalid ioctl cmd = 0x%08x\n", cmd);
 		rc = -ENOTTY;
@@ -450,14 +456,8 @@ static ssize_t rgb_module_cdev_write(struct file *file, const char __user *buff,
 	str_len = strnlen(lp->wr_buf, BUFF_SIZE);
 	if (str_len < BUFF_CONF_STR_LEN) {
 		/* Don't have enough data - skip to end*/
-		goto rgb_write_end;
-	}
-
-	if (str_len > BUFF_CONF_STR_LEN) {
-		/* More data than needed, report the error */
-		dev_err(lp->device, "More data than needed the format is: 0xAA 0xBB 0xCC \n");
+		dev_err(lp->device, "Don't have enought of data! The format is: 0xAA 0xBB 0xCC \n");
 		rc = -EINVAL;
-		/* Initialize the buffer */
 		goto rgb_write_end;
 	}
 
