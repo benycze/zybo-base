@@ -1,1 +1,11 @@
 debian-zybo/reps
+
+# Vivado generated files
+*.jou
+*.log
+*.xpr
+*.xsa
+
+# Compiler outputs
+*.o
+*.a
