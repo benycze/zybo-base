@@ -13,10 +13,10 @@ $(POKE): $(POKE_OBJS)
 $(PEEK): $(PEEK_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(PEEK_OBJS) $(LDLIBS)
 
-install:
+install: $(PEEK) $(POKE)
 	cp $(POKE) $(PEEK) /usr/bin/
 
 clean:
-	-rm -f $(POKE) $(PEEK) *.elf *.gdb *.o
+	rm -f $(POKE) $(PEEK) *.elf *.gdb *.o
 
 

@@ -22,6 +22,8 @@ OUT_FOLDER=`pwd`/output
 CONF_FOLDER=`pwd`/conf
 # Folder with scripts
 SCRIPT_FOLDER=`pwd`/scripts
+# Xilinx tools
+XILINX_TOOLS=`pwd`/xilinx-tools
 # Output folder for the FSBL
 FSBL_OUTPUT=${OUT_FOLDER}/fsbl
 # DTC folder
@@ -37,7 +39,6 @@ UBOOT_OUTPUT=${OUT_FOLDER}/uboot
 # Kernel folder
 KERNEL_FOLDER=${REPO_FOLDER}/linux-xlnx.git
 KERNEL_OUTPUT=${OUT_FOLDER}/linux-xlnx/build
-#KERNEL_MODULES_OUTPUT=${OUT_FOLDER}/linux-xlnx-modules
 # Bootloader folder
 BOOTLOADER_OUTPUT=${OUT_FOLDER}/bootloader
 
@@ -204,11 +205,12 @@ function build_debian_rootfs () {
     sudo cp `which qemu-arm-static` ${DEBIAN_OUTPUT}/usr/bin
 
     # Used in the case of pernament image
-    # sudo cp -r ${KERNEL_MODULES_OUTPUT}/lib/modules ${DEBIAN_OUTPUT}/lib
     sudo cp ${KERNEL_OUTPUT}/../*.deb ${DEBIAN_OUTPUT}/
     # Copy the script which generates the u-boot images after kernel install
     sudo cp ${SCRIPT_FOLDER}/uimage-gen ${DEBIAN_OUTPUT}/etc/kernel/postinst.d/
     sudo chmod 755 ${DEBIAN_OUTPUT}/etc/kernel/postinst.d/uimage-gen
+    # Copy Xilinx helping tools
+    sudo cp -r ${XILINX_TOOLS} ${DEBIAN_OUTPUT}/usr/src/
 
     # Used in the case of non-persistent image
     echo "Copying data inside the chroot ..."

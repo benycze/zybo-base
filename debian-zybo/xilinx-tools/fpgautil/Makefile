@@ -8,10 +8,10 @@ all: $(FPGA_UTIL)
 $(FPGA_UTIL): $(FPGA_UTIL_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(FPGA_UTIL_OBJS) $(LDLIBS)
 
-install:
+install: $(FPGA_UTIL)
 	cp $(FPGA_UTIL) /usr/bin/
 
 clean:
-	-rm -f $(FPGA_UTIL) *.elf *.gdb *.o
+	rm -f $(FPGA_UTIL) *.elf *.gdb *.o
 
 

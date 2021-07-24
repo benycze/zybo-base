@@ -42,7 +42,6 @@ APT::Install-Suggests   "0";
 EOT
 
 echo "Installing packages ..."
-
 apt update
 apt upgrade -y
 apt install -y locales dialog
@@ -52,7 +51,14 @@ sed -i -e "s/# $LANG.*/$LANG UTF-8/" /etc/locale.gen && \
 apt install -y ${DEB_PACKAGES}
 
 # Install kernel package
+echo "Installing kernel ..."
 dpkg -i /*.deb
+
+# Install helping xilinx tools
+echo "Installing Xilinx tools ..."
+for tool in /usr/src/xilinx-tools/*; do
+    make -C ${tool} install clean
+done
 
 echo "Setting system ..."
 # Setup hostname  & initial stuff
@@ -63,6 +69,7 @@ cat <<EOT >> /etc/securetty
 ttyPS0
 EOT
 
+# Configure fstab
 echo "/dev/mmcblk0p1 /boot vfat defaults 0 0" >> /etc/fstab
 echo "/dev/mmcblk0p2 / ext4 defaults 0 0" >> /etc/fstab
 
