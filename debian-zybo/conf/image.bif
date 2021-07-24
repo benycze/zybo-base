@@ -1,0 +1,16 @@
+// -------------------------------------------------------------------------------
+//  PROJECT: Zybo Base
+// -------------------------------------------------------------------------------
+//  AUTHORS: Pavel Benacek <pavel.benacek@gmail.com>
+//  LICENSE: The MIT License (MIT), please read LICENSE file
+//  WEBSITE: https://github.com/benycze/zybo-base
+// -------------------------------------------------------------------------------
+//
+// Bif file is taken from: https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841976/Prepare+boot+image
+
+BOOT_BIN: {
+        [bootloader]fsbl.elf
+        u-boot.elf
+        //[load=0x00100000]system.dtb
+        //[load=0x00200000]uImage.bin
+}

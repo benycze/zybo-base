@@ -1,0 +1,18 @@
+initrd_image=initramdisk.image.gz
+initrd_image_address=0x4000000
+kernel_image=uImage
+kernel_load_address=0x002a0000
+device_tree_image=zynq-debian.dtb
+devicetree_load_address=0x2000000
+
+setenv bootargs console=ttyPS0,115200 earlycon root=/dev/mmcblk0p2 rw rootwait
+
+echo "Boot arguments:"; printenv bootargs
+
+if mmcinfo; then
+    echo Copying Linux from SD... 
+    fatload mmc 0 ${kernel_load_address} ${kernel_image}
+    fatload mmc 0 ${initrd_image_address} ${initrd_image}
+    fatload mmc 0 ${devicetree_load_address} ${device_tree_image}
+    bootm ${kernel_load_address} ${initrd_image_address} ${devicetree_load_address}
+fi
