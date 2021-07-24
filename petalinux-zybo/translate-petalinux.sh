@@ -23,7 +23,6 @@ function print_usage {
     echo "The interactive mode is started if you don't pass any argument."
 }
 
-# Arguments parsing -----------------------------------------------
 # Parse arguments ----------------------------------------------------------------
 kernel_config=0
 rootfs_config=0
