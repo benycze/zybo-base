@@ -15,37 +15,39 @@ set -e
 # #######################################################################################
 
 # Folder with downloaded repos
-REPO_FOLDER=`pwd`/reps
+REPO_FOLDER="`pwd`/reps"
 # Folder with output data
-OUT_FOLDER=`pwd`/output
+OUT_FOLDER="`pwd`/output"
 # Configuration folder
-CONF_FOLDER=`pwd`/conf
+CONF_FOLDER="`pwd`/conf"
 # Folder with scripts
-SCRIPT_FOLDER=`pwd`/scripts
+SCRIPT_FOLDER="`pwd`/scripts"
 # Xilinx tools
-XILINX_TOOLS=`pwd`/xilinx-tools
+XILINX_TOOLS="`pwd`/xilinx-tools"
 # Output folder for the FSBL
-FSBL_OUTPUT=${OUT_FOLDER}/fsbl
+FSBL_OUTPUT="${OUT_FOLDER}/fsbl"
 # DTC folder
-DTC_FOLDER=${REPO_FOLDER}/dtc.git
-# Device Tree for Xilinx Device
-DT_XLNX=${REPO_FOLDER}/device-tree-xlnx.git
-DT_XLNX_OUTPUT=${OUT_FOLDER}/dts-zynq
-DTS_TOP=${DT_XLNX_OUTPUT}/zynq-debian.dts
-DTB_TOP=${DT_XLNX_OUTPUT}/zynq-debian.dtb
+DTC_FOLDER="${REPO_FOLDER}/dtc.git"
+# Device Tree for Xilinx Device  
+DT_XLNX="${REPO_FOLDER}/device-tree-xlnx.git"
+DT_XLNX_OUTPUT="${OUT_FOLDER}/dts-zynq"
+DTS_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dts"
+DTB_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dtb"
 # U-Boot folder
-UBOOT_FOLDER=${REPO_FOLDER}/u-boot-xlnx.git
-UBOOT_OUTPUT=${OUT_FOLDER}/uboot
+UBOOT_FOLDER="${REPO_FOLDER}/u-boot-xlnx.git"
+UBOOT_OUTPUT="${OUT_FOLDER}/uboot"
 # Kernel folder
-KERNEL_FOLDER=${REPO_FOLDER}/linux-xlnx.git
-KERNEL_OUTPUT=${OUT_FOLDER}/linux-xlnx/build
+KERNEL_FOLDER="${REPO_FOLDER}/linux-xlnx.git"
+KERNEL_OUTPUT="${OUT_FOLDER}/linux-xlnx/build"
 # Bootloader folder
-BOOTLOADER_OUTPUT=${OUT_FOLDER}/bootloader
+BOOTLOADER_OUTPUT="${OUT_FOLDER}/bootloader"
+# Tarball folder
+TARBALL_OUTPUT="${OUT_FOLDER}/tarball"
 
 # Rootfs configuration
-DEBIAN_OUTPUT=${OUT_FOLDER}/debian10-rootfs/root
+DEBIAN_OUTPUT="${OUT_FOLDER}/debian10-rootfs/root"
 DEBIAN_DISTRO=buster
-DEBIAN_ARCHIVE_FILE=debian-${DEBIAN_DISTRO}-rootfs-vanilla.tgz
+DEBIAN_ARCHIVE_FILE="debian-${DEBIAN_DISTRO}-rootfs-vanilla.tgz"
 
 # Cross-compiler configuration
 export CROSS_COMPILE=arm-linux-gnueabihf-
@@ -85,12 +87,12 @@ function print_usage {
 
 # Receive the source from GIT
 function get_git_source () {
-    URL=$1
-    DEST=$2
+    URL="$1"
+    DEST="$2"
     echo -e "Processing ${URL} (destination ${DEST}) ...\n"
-    if [ ! -e ${DEST} ]; then
+    if [ ! -e "${DEST}" ]; then
         # Clone the project if it doesn't exist
-        git clone --recursive ${URL} ${DEST}
+        git clone --recursive "${URL}" "${DEST}"
     fi
 }
 
@@ -100,28 +102,28 @@ function get_git_source () {
 
 function get_sources () {
     print_boxed "Getting sources"
-    mkdir -p ${REPO_FOLDER}
+    mkdir -p "${REPO_FOLDER}"
 
-    get_git_source https://github.com/Xilinx/linux-xlnx.git ${KERNEL_FOLDER}
-    get_git_source https://github.com/Xilinx/u-boot-xlnx.git ${UBOOT_FOLDER}
-    get_git_source https://github.com/Xilinx/device-tree-xlnx.git ${DT_XLNX}
-    get_git_source https://git.kernel.org/pub/scm/utils/dtc/dtc.git ${REPO_FOLDER}/dtc.git ${DTC_FOLDER}
+    get_git_source https://github.com/Xilinx/linux-xlnx.git "${KERNEL_FOLDER}"
+    get_git_source https://github.com/Xilinx/u-boot-xlnx.git "${UBOOT_FOLDER}"
+    get_git_source https://github.com/Xilinx/device-tree-xlnx.git "${DT_XLNX}"
+    get_git_source https://git.kernel.org/pub/scm/utils/dtc/dtc.git "${REPO_FOLDER}/dtc.git" "${DTC_FOLDER}"
 }
 
 function build_fsbl () {
     print_boxed "Building the FSBL"
-    mkdir -p ${FSBL_OUTPUT}
-    output_folder=`realpath ${FSBL_OUTPUT}`
+    mkdir -p "${FSBL_OUTPUT}"
+    output_folder="`realpath "${FSBL_OUTPUT}"`"
 
-    xsa_file=`find ../proj/*.xsa -exec realpath {} \;`
-    if [ -z ${xsa_file} ]; then
+    xsa_file="`find ../proj/*.xsa -exec realpath {} \;`"
+    if [ -z "${xsa_file}" ]; then
         "XSA file doesn't exist - cannot generate the FSBL"
         exit 1
     fi
 
-    xsct scripts/generate-fsbl.tcl $xsa_file $output_folder
+    xsct scripts/generate-fsbl.tcl "$xsa_file" "$output_folder"
     pushd .
-    cd ${output_folder}
+    cd "${output_folder}"
     make CFLAGS=-DFSBL_DEBUG_INFO
     popd
 }
@@ -129,11 +131,11 @@ function build_fsbl () {
 function translate_dtc () {
     print_boxed "Building DTC"
     pushd .
-    cd ${DTC_FOLDER}
+    cd "${DTC_FOLDER}"
     make 
     # Export the path to compiled tool
-    export PATH=`pwd`:${PATH}
-    dtc_path=`which dtc`
+    export PATH="`pwd`":"${PATH}"
+    dtc_path="`which dtc`"
     echo -e "Path of used dtc: $dtc_path \n"
     popd
 }
@@ -141,39 +143,38 @@ function translate_dtc () {
 function build_uboot () {
     print_boxed "Building U-BOOT"
     pushd .
-    cd ${UBOOT_FOLDER}
-    mkdir -p ${UBOOT_OUTPUT}
+    cd "${UBOOT_FOLDER}"
+    mkdir -p "${UBOOT_OUTPUT}"
     # Build the u-boot together with device tree. The name of output file
     # is stored in DEVICE_TREE variable
-    make O=${UBOOT_OUTPUT} distclean
-    make O=${UBOOT_OUTPUT} xilinx_zynq_virt_defconfig
-    make O=${UBOOT_OUTPUT} -j${JOBS} DEVICE_TREE=${DEVICE_TREE}
+    make O="${UBOOT_OUTPUT}" distclean
+    make O="${UBOOT_OUTPUT}" xilinx_zynq_virt_defconfig
+    make O="${UBOOT_OUTPUT}" -j${JOBS} DEVICE_TREE="${DEVICE_TREE}"
     popd
 }
 
 function build_kernel () {
     print_boxed "Building Linux Kernel"
     pushd .
-    cd ${KERNEL_FOLDER}
-    mkdir -p ${KERNEL_OUTPUT}
-    make O=${KERNEL_OUTPUT} ARCH=arm xilinx_zynq_defconfig
+    cd "${KERNEL_FOLDER}"
+    mkdir -p "${KERNEL_OUTPUT}"
+    make O="${KERNEL_OUTPUT}" ARCH=arm xilinx_zynq_defconfig
     #TODO: Kernel patching & pre-stored configure if needed
-    make O=${KERNEL_OUTPUT} bindeb-pkg
-
+    make O="${KERNEL_OUTPUT}" bindeb-pkg
     popd
 }
 
 function build_zynq_dts () {
     print_boxed "Build Zynq DTS"
-    mkdir -p ${DT_XLNX_OUTPUT}
+    mkdir -p "${DT_XLNX_OUTPUT}"
 
-    xsa_file=`find ../proj/*.xsa -exec realpath {} \;`
-    if [ -z ${xsa_file} ]; then
-        "XSA file doesn't exist - cannot generate the FSBL"
+    xsa_file="`find ../proj/*.xsa -exec realpath {} \;`"
+    if [ -z "${xsa_file}" ]; then
+        echo "XSA file doesn't exist - cannot generate the FSBL"
         exit 1
     fi
 
-    xsct scripts/generate-dts.tcl $xsa_file $DT_XLNX_OUTPUT $DT_XLNX
+    xsct scripts/generate-dts.tcl "$xsa_file" "$DT_XLNX_OUTPUT" "$DT_XLNX"
 
     echo "Translating to DTB ..."
     echo "  * DTS File = ${DTS_TOP}"
@@ -181,7 +182,7 @@ function build_zynq_dts () {
 
     echo "Preparing the Device Tree for the system ..."
     pushd .
-    cd ${DT_XLNX_OUTPUT}
+    cd "${DT_XLNX_OUTPUT}"
     # Remove the PL source from the source code (we want to upload bitstream at runtime)
     sed -i '/#include "pl.dtsi"/d' system-top.dts
     
@@ -189,8 +190,8 @@ function build_zynq_dts () {
     # TODO: Here we need to prepare the device tree from all DTSI
 
     # Echo translating the Device Tree
-    gcc -I ${DT_XLNX_OUTPUT} -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp ${DT_XLNX_OUTPUT}/system-top.dts -o ${DTS_TOP}
-    dtc -I dts -O dtb -o ${DTB_TOP} ${DTS_TOP}
+    gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/system-top.dts" -o "${DTS_TOP}"
+    dtc -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
     popd
 }
 
@@ -199,54 +200,71 @@ function build_debian_rootfs () {
 
     pushd .
     echo "Bootstraping initial system ..."
-    sudo rm -rf ${DEBIAN_OUTPUT}
-    mkdir -p ${DEBIAN_OUTPUT}
-    sudo debootstrap --arch=armhf --foreign ${DEBIAN_DISTRO} ${DEBIAN_OUTPUT}
-    sudo cp `which qemu-arm-static` ${DEBIAN_OUTPUT}/usr/bin
+    sudo rm -rf "${DEBIAN_OUTPUT}"
+    mkdir -p "${DEBIAN_OUTPUT}"
+    sudo debootstrap --arch=armhf --foreign "${DEBIAN_DISTRO}" "${DEBIAN_OUTPUT}"
+    sudo cp `which qemu-arm-static` "${DEBIAN_OUTPUT}/usr/bin"
 
     # Used in the case of pernament image
-    sudo cp ${KERNEL_OUTPUT}/../*.deb ${DEBIAN_OUTPUT}/
+    sudo cp "${KERNEL_OUTPUT}"/../*.deb "${DEBIAN_OUTPUT}/"
     # Copy the script which generates the u-boot images after kernel install
-    sudo cp ${SCRIPT_FOLDER}/uimage-gen ${DEBIAN_OUTPUT}/etc/kernel/postinst.d/
-    sudo chmod 755 ${DEBIAN_OUTPUT}/etc/kernel/postinst.d/uimage-gen
+    sudo cp "${SCRIPT_FOLDER}/uimage-gen" "${DEBIAN_OUTPUT}/etc/kernel/postinst.d/"
+    sudo chmod 755 "${DEBIAN_OUTPUT}/etc/kernel/postinst.d/uimage-gen"
     # Copy Xilinx helping tools
-    sudo cp -r ${XILINX_TOOLS} ${DEBIAN_OUTPUT}/usr/src/
+    sudo cp -r "${XILINX_TOOLS}" "${DEBIAN_OUTPUT}/usr/src/"
 
     # Used in the case of non-persistent image
     echo "Copying data inside the chroot ..."
-    cp ${SCRIPT_FOLDER}/bootstrap-debian-image.sh ${DEBIAN_OUTPUT}
+    cp "${SCRIPT_FOLDER}/bootstrap-debian-image.sh" "${DEBIAN_OUTPUT}"
 
     echo "Running chroot ..."
-    sudo chroot ${DEBIAN_OUTPUT} /bin/bash -c "bash /bootstrap-debian-image.sh ${DEBIAN_DISTRO}"
-    sudo rm -f ${DEBIAN_OUTPUT}/bootstrap-debian-image.sh
+    sudo chroot "${DEBIAN_OUTPUT}" /bin/bash -c "bash /bootstrap-debian-image.sh ${DEBIAN_DISTRO}"
+    sudo rm -f "${DEBIAN_OUTPUT}/bootstrap-debian-image.sh"
 
-    cd ${DEBIAN_OUTPUT}
+    cd "${DEBIAN_OUTPUT}"
 
     echo "Packing rootfs into archive (${DEBIAN_ARCHIVE_FILE}) ..."
     sudo find . -type s | sed 's/^\.\///' > ../sockets-to-exclude
-    sudo tar --preserve-permissions -czf ../${DEBIAN_ARCHIVE_FILE} -X ../sockets-to-exclude *
-
+    sudo tar --preserve-permissions -czf ../"${DEBIAN_ARCHIVE_FILE}" -X ../sockets-to-exclude *
     popd
 }
 
 function build_bootloader () {
     print_boxed "Building the Bootloader"
-    mkdir -p ${BOOTLOADER_OUTPUT}
+    mkdir -p "${BOOTLOADER_OUTPUT}"
 
     # Collect artefacts and prepare the boot image
     pushd .
-    cd ${OUT_FOLDER}
-    find ${FSBL_OUTPUT} -name executable.elf -exec cp {} ${BOOTLOADER_OUTPUT}/fsbl.elf  \;
-    find ${UBOOT_OUTPUT} -name u-boot.elf -exec cp {} ${BOOTLOADER_OUTPUT} \;
-    cp ${DTB_TOP} ${BOOTLOADER_OUTPUT}
+    cd "${OUT_FOLDER}"
+    find "${FSBL_OUTPUT}" -name executable.elf -exec cp {} "${BOOTLOADER_OUTPUT}/fsbl.elf"  \;
+    find "${UBOOT_OUTPUT}" -name u-boot.elf -exec cp {} "${BOOTLOADER_OUTPUT}" \;
+    cp "${DTB_TOP}" "${BOOTLOADER_OUTPUT}"
 
-    cd ${BOOTLOADER_OUTPUT}
+    cd "${BOOTLOADER_OUTPUT}"
     echo "Generaring the BOOT.BIN file (FSBL + U-Boot) ..."
-    bootgen -arch zynq -image ${CONF_FOLDER}/image.bif -w -o i BOOT.BIN
+    bootgen -arch zynq -image "${CONF_FOLDER}/image.bif" -w -o i BOOT.BIN
     echo "Generating the boot.scr file ..."
-    mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "Boot image script" -d ${CONF_FOLDER}/u-boot.txt boot.scr
-
+    mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "Boot image script" -d "${CONF_FOLDER}/u-boot.txt" boot.scr
     popd
+}
+
+function build_tarball () {
+    print_boxed "Collecting all required artefacts into tarball (${TARBALL_OUTPUT}) ..."
+    mkdir -p "${TARBALL_OUTPUT}"
+
+    FILES=("${DEBIAN_OUTPUT}/../${DEBIAN_ARCHIVE_FILE}" \
+    "${BOOTLOADER_OUTPUT}/*.dtb" \
+    "${BOOTLOADER_OUTPUT}/BOOT.BIN" \
+    "${BOOTLOADER_OUTPUT}/boot.scr")
+
+    for file in "${FILES[@]}"; do
+        echo "Processing: ${file}"
+        if [ -e "${file}" ]; then
+            mv "${file}"  "${TARBALL_OUTPUT}"
+        else 
+            echo "File ${file} wasn't found!"
+        fi
+    done
 }
 
 # #######################################################################################
@@ -262,7 +280,8 @@ p_build_kernel=0
 p_build_dts=0
 p_build_rootfs=0
 p_build_boot=0
-while getopts "hsfrukdobx" opt; do
+p_tarball=0
+while getopts "hsfrukdobxt" opt; do
     case "$opt" in
     h)  print_usage
         exit 0
@@ -283,51 +302,57 @@ while getopts "hsfrukdobx" opt; do
         ;;
     b) p_build_boot=1
         ;;
+    t) p_tarball=1
+        ;;
     esac
 done
 shift $((OPTIND -1))
 
 # Main body  ---------------------------------------------------------------------
 
-if [ ${p_download_sources} -eq 1 ] || [ ! -e  ${REPO_FOLDER} ]; then
+if [ "${p_download_sources}" -eq 1 ] || [ ! -e "${REPO_FOLDER}" ]; then
     get_sources
 fi
 
-if [ ${p_rebuild_all} -eq 1 ]; then
+if [ "${p_rebuild_all}" -eq 1 ]; then
     # We need to remove the folder with outputs which will enforce the build process
     # again
     echo "Cleaning output folder (${OUT_FOLDER}) ..."
-    sudo rm -rf ${OUT_FOLDER}
+    sudo rm -rf "${OUT_FOLDER}"
 fi
 
-if [ ${p_build_fsbl} -eq 1 ] || [ ! -e  ${FSBL_OUTPUT} ]; then
+if [ "${p_build_fsbl}" -eq 1 ] || [ ! -e "${FSBL_OUTPUT}" ]; then
     build_fsbl
 fi
 
 translate_dtc
 
-if [ ${p_build_uboot} -eq 1 ] || [ ! -e  ${UBOOT_OUTPUT} ]; then
+if [ "${p_build_uboot}" -eq 1 ] || [ ! -e "${UBOOT_OUTPUT}" ]; then
     build_uboot
 fi
 # Update the path for the mkimage
-export PATH=${UBOOT_OUTPUT}/tools:$PATH
-mkimage_path=`which mkimage`
+export PATH="${UBOOT_OUTPUT}"/tools:"$PATH"
+mkimage_path="`which mkimage`"
 echo -e "Path of used mkimage: $mkimage_path \n"
 
-if [ ${p_build_kernel} -eq 1 ] || [ ! -e  ${KERNEL_OUTPUT} ]; then
+if [ "${p_build_kernel}" -eq 1 ] || [ ! -e "${KERNEL_OUTPUT}" ]; then
     build_kernel
 fi
 
-if [ ${p_build_dts} -eq 1 ] || [ ! -e  ${DT_XLNX_OUTPUT} ]; then
+if [ "${p_build_dts}" -eq 1 ] || [ ! -e "${DT_XLNX_OUTPUT}" ]; then
     build_zynq_dts
 fi
 
-if [ ${p_build_rootfs} -eq 1 ] || [ ! -e  ${DEBIAN_OUTPUT} ]; then
+if [ "${p_build_rootfs}" -eq 1 ] || [ ! -e "${DEBIAN_OUTPUT}" ]; then
     build_debian_rootfs
 fi
 
-if [ ${p_build_boot} -eq 1 ] || [ ! -e  ${BOOTLOADER_OUTPUT} ]; then
+if [ "${p_build_boot}" -eq 1 ] || [ ! -e "${BOOTLOADER_OUTPUT}" ]; then
     build_bootloader
+fi
+
+if [ "${p_tarball}" -eq 1 ] || [ ! -e "${TARBALL_OUTPUT}" ]; then
+    build_tarball
 fi
 
 echo "Done!"
