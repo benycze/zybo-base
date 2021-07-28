@@ -81,6 +81,7 @@ function print_usage {
     echo "-d         => build DTB & DTS"
     echo "-b         => buld bootloader"
     echo "-o         => build the Debian Rootfs"
+    echo "-t         => build the tarball"
     echo ""
     echo "The interactive mode is started if you don't pass any argument."
 }
