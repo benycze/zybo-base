@@ -15,6 +15,8 @@ inherit module
 
 INHIBIT_PACKAGE_STRIP = "1"
 
+FILESEXTRAPATHS_prepend := "${EXT_SRC_ROOT}/modules/led-module:"
+
 SRC_URI = " file://Makefile \
             file://led-module.c \
 	        file://COPYING \

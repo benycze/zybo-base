@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS_prepend := "${EXT_SRC_ROOT}/device-tree-mods:"
 
 SRC_URI += "file://system-user.dtsi"
 

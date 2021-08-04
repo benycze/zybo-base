@@ -1,5 +1,5 @@
 PETALINUX_VER=2020.2
-VALIDATE_HW_CHKSUM=1
+VALIDATE_HW_CHKSUM=0
 HARDWARE_PATH=/home/pavel/Sources/hdl/zybo/zybo-base.git/proj/board_design_wrapper.xsa
 HARDWARE_CHECKSUM=bedc7256a1653e825f4c8e3440968aea
 YOCTO_SDK=5ff8fc5f85d1566b314bb73eaa378212
