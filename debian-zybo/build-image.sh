@@ -31,8 +31,9 @@ DTC_FOLDER="${REPO_FOLDER}/dtc.git"
 # Device Tree for Xilinx Device  
 DT_XLNX="${REPO_FOLDER}/device-tree-xlnx.git"
 DT_XLNX_OUTPUT="${OUT_FOLDER}/dts-zynq"
+DTB_FILE="zynq-debian.dtb"
 DTS_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dts"
-DTB_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dtb"
+DTB_TOP="${DT_XLNX_OUTPUT}/${DTB_FILE}"
 # U-Boot folder
 UBOOT_FOLDER="${REPO_FOLDER}/u-boot-xlnx.git"
 UBOOT_OUTPUT="${OUT_FOLDER}/uboot"
@@ -254,7 +255,7 @@ function build_tarball () {
     mkdir -p "${TARBALL_OUTPUT}"
 
     FILES=("${DEBIAN_OUTPUT}/../${DEBIAN_ARCHIVE_FILE}" \
-    "${BOOTLOADER_OUTPUT}/*.dtb" \
+    "${BOOTLOADER_OUTPUT}/${DTB_FILE}" \
     "${BOOTLOADER_OUTPUT}/BOOT.BIN" \
     "${BOOTLOADER_OUTPUT}/boot.scr")
 
