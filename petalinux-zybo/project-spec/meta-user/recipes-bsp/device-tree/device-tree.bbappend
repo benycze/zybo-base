@@ -2,6 +2,8 @@ FILESEXTRAPATHS_prepend := "${EXT_SRC_ROOT}/device-tree-mods:"
 
 SRC_URI += "file://system-user.dtsi"
 
+CUSTOM_PL_INCLUDE_DTSI := "${EXT_SRC_ROOT}/device-tree-mods/pl-custom.dtsi"
+
 python () {
     if d.getVar("CONFIG_DISABLE"):
         d.setVarFlag("do_configure", "noexec", "1")
