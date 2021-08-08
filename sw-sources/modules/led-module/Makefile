@@ -9,7 +9,7 @@
 ###############################################################################
 # Export helping variables for the compilation via Makefile
 ## Root of the project
-PROJ_ROOT=$(shell pwd)/../../petalinux-zybo
+PROJ_ROOT=$(shell pwd)/../../../petalinux-zybo
 # Cross compilation settings
 ifndef ARCH
 export ARCH=arm
