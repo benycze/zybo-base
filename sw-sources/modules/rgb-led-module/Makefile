@@ -9,17 +9,27 @@
 ###############################################################################
 # Export helping variables for the compilation via Makefile
 ## Root of the project
-PROJ_ROOT=$(shell pwd)/../../../../..
+PROJ_ROOT=$(shell pwd)/../../petalinux-zybo
 # Cross compilation settings
+ifndef ARCH
 export ARCH=arm
+endif
+
+ifndef CROSS_COMPILE
 export CROSS_COMPILE:=arm-xilinx-linux-gnueabi-
+endif
+
+ifndef CONFIG_RGB_LED_MODULE
+CONFIG_RGB_LED_MODULE=m
+endif
+
 CC=$(CROSS_COMPILE)gcc
 KERNEL_SRC=$(shell dirname `find ${PROJ_ROOT}/build/tmp/work/ -name .config`)
 # Makefile body ###############################################################
 # Put all default flags here
 MY_CFLAGS += 
 
-obj-m := rgb-led-module.o
+obj-$(CONFIG_RGB_LED_MODULE) += rgb-led-module.o
 ccflags-y += ${MY_CFLAGS}
 
 SRC := $(shell pwd)

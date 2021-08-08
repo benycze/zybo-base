@@ -4,7 +4,7 @@ TODO: Write the documentation
 
 * Need to source SDK from Vivado
 * We will use the arm-linux-gnueabihf- cross compiler (maybe we need to use the Debian one?)
-* Write the list of packages which needs to be intalled on the system
+* Write the list of packages which needs to be installed on the system
     * Flex
     * Bison
     * build-essential
@@ -16,17 +16,13 @@ TODO: Write the documentation
 
 
 Booting:
-* https://community.nxp.com/t5/i-MX-Processors/load-kernel-from-SD-card-in-U-boot/m-p/432978
 * https://u-boot.readthedocs.io/en/stable/usage/booti.html
-* https://stackoverflow.com/questions/60368553/what-does-fatload-mmc-and-bootm-means-in-the-uboot
-* https://github.com/Kampi/Zybo-Linux/blob/master/u-boot/uEnv.txt
 * https://github.com/Kampi/Zybo-Linux/blob/master/docs/wiki/Prepare-a-SD-Card.md
 * https://github.com/Kampi/Zybo-Linux
 * https://github.com/PyHDI/zynq-linux
 * https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842223/U-boot
 * https://github.com/Netgate/meta-ubmc/blob/master/scripts/uEnv.txt-example
 * https://www.denx.de/wiki/DULG/LinuxKernelArgs
-* https://unix.stackexchange.com/questions/30990/can-vmlinux-be-used-instead-of-uimage
 
 
 * We need to create two partitions (one for boot and second for data)

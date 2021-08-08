@@ -1,0 +1,29 @@
+# -------------------------------------------------------------------------------
+#  PROJECT: Zybo Base
+# -------------------------------------------------------------------------------
+#  AUTHORS: Pavel Benacek <pavel.benacek@gmail.com>
+#  LICENSE: The MIT License (MIT), please read LICENSE file
+#  WEBSITE: https://github.com/benycze/zybo-base
+# -------------------------------------------------------------------------------
+
+menu "PB Zybo"
+
+config LED_MODULE
+    tristate "LED Module for Zybo base design"
+    default m
+    help
+        "Driver for the Zybo base LED example"
+
+config RGB_LED_MODULE
+    tristate "LED Module for Zybo base design"
+    default m
+    help
+        "Driver for the Zybo base RGB LED example"
+
+config SWITCH_MODULE
+    tristate "LED Module for Zybo base design"
+    default m
+    help
+        "Driver for the Zybo base Switch example"
+
+endmenu

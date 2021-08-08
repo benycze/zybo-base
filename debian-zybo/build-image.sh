@@ -40,10 +40,13 @@ UBOOT_OUTPUT="${OUT_FOLDER}/uboot"
 # Kernel folder
 KERNEL_FOLDER="${REPO_FOLDER}/linux-xlnx.git"
 KERNEL_OUTPUT="${OUT_FOLDER}/linux-xlnx/build"
+KERNEL_MODULE_FOLDER="${KERNEL_FOLDER}/drivers/pb-zybo"
 # Bootloader folder
 BOOTLOADER_OUTPUT="${OUT_FOLDER}/bootloader"
 # Tarball folder
 TARBALL_OUTPUT="${OUT_FOLDER}/tarball"
+# Root folder with project sources
+SW_SOURCES="`pwd`/../sw-sources"
 
 # Rootfs configuration
 DEBIAN_OUTPUT="${OUT_FOLDER}/debian10-rootfs/root"
@@ -157,11 +160,27 @@ function build_uboot () {
 
 function build_kernel () {
     print_boxed "Building Linux Kernel"
-    pushd .
+
+    # Add the module into the source tree
+    if [ ! -e "${KERNEL_MODULE_FOLDER}" ]; then
+        echo "Linking module folder into kernel source ..."
+        ln -s "${SW_SOURCES}/modules" "${KERNEL_MODULE_FOLDER}"
+        cd "${KERNEL_MODULE_FOLDER}/.."
+        # Add the folder with out sources
+        sed -E -i 's/endmenu/source \"drivers\/pb-zybo\/Kconfig\"\nendmenu/' Kconfig
+        echo "obj-y += pb-zybo/" >> Makefile
+    fi
+
     cd "${KERNEL_FOLDER}"
+    pushd .
+
+    # Create output folder and make the default configuration
     mkdir -p "${KERNEL_OUTPUT}"
     make O="${KERNEL_OUTPUT}" ARCH=arm xilinx_zynq_defconfig
-    #TODO: Kernel patching & pre-stored configure if needed
+
+    echo "Patching the defualt configuration ..."
+    scripts/kconfig/merge_config.sh -m -O "${KERNEL_OUTPUT}" "${KERNEL_OUTPUT}/.config" "${SW_SOURCES}/kernel-config/*.cfg"
+
     make O="${KERNEL_OUTPUT}" bindeb-pkg
     popd
 }
