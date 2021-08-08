@@ -233,6 +233,7 @@ function build_debian_rootfs () {
     sudo chmod 755 "${DEBIAN_OUTPUT}/etc/kernel/postinst.d/uimage-gen"
     # Copy Xilinx helping tools
     sudo cp -r "${XILINX_TOOLS}" "${DEBIAN_OUTPUT}/usr/src/"
+    sudo cp -r "${SW_SOURCES}" "${DEBIAN_OUTPUT}/usr/src/pb-zybo"
 
     # Used in the case of non-persistent image
     echo "Copying data inside the chroot ..."

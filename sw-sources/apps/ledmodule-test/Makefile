@@ -21,6 +21,9 @@ $(APP): print_config $(APP_OBJS)
 clean:
 	rm -f $(APP) *.o
 
+install: $(APP)
+	cp $(APP) /usr/local/bin
+
 print_config:
 	@echo "#######################################################"
 	@echo "Using the following configuration"

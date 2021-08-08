@@ -54,9 +54,14 @@ apt install -y ${DEB_PACKAGES}
 echo "Installing kernel ..."
 dpkg -i /*.deb
 
-# Install helping xilinx tools
+# Install non-distro tools
 echo "Installing Xilinx tools ..."
 for tool in /usr/src/xilinx-tools/*; do
+    make -C ${tool} install clean
+done
+
+echo "Install Zybo Base tools ..."
+for tool in /usr/src/pb-zybo/apps/*; do
     make -C ${tool} install clean
 done
 
