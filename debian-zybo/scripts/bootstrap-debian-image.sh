@@ -96,6 +96,23 @@ allow-hotplug eth0
 iface eth0 inet dhcp
 EOT
 
+# Create & configure FPGA service
+cat <<EOT > /etc/systemd/system/fpga.service
+[Unit]
+Description=Load the FPGA bitstream
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/fpgautil -b /lib/firmware/fpga/board_design_wrapper.bit.bin -o /lib/firmware/fpga/board_design_wrapper.bit.dtb
+RemainAfterExit=true
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target
+EOT
+
+ln -s /etc/systemd/system/fpga.service /lib/systemd/system/fpga.service
+
 # Cleanup & finish
 apt-get clean
 dpkg -l > dpkg-list.txt
