@@ -17,4 +17,5 @@ puts "* REPO folder:    $repo"
 hsi open_hw_design $xsa
 hsi set_repo_path $repo
 hsi create_sw_design device-tree -os device_tree -proc ps7_cortexa9_0
+hsi set_property CONFIG.dt_overlay true [hsi get_os]
 hsi generate_target -dir $output

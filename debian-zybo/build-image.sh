@@ -32,8 +32,14 @@ DTC_FOLDER="${REPO_FOLDER}/dtc.git"
 DT_XLNX="${REPO_FOLDER}/device-tree-xlnx.git"
 DT_XLNX_OUTPUT="${OUT_FOLDER}/dts-zynq"
 DTB_FILE="zynq-debian.dtb"
+DTB_PL_FILE="board_design_wrapper.bit.dtb"
 DTS_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dts"
+DTS_PL_TOP="${DT_XLNX_OUTPUT}/fpga-pl.dts"
 DTB_TOP="${DT_XLNX_OUTPUT}/${DTB_FILE}"
+DTB_PL_TOP="${DT_XLNX_OUTPUT}/${DTB_PL_FILE}"
+# FPGA bitstream name
+FPGA_BIN="board_design_wrapper.bit.bin"
+FPGA_PROJ_FOLDER="`pwd`/../proj"
 # U-Boot folder
 UBOOT_FOLDER="${REPO_FOLDER}/u-boot-xlnx.git"
 UBOOT_OUTPUT="${OUT_FOLDER}/uboot"
@@ -204,15 +210,17 @@ function build_zynq_dts () {
     echo "Preparing the Device Tree for the system ..."
     pushd .
     cd "${DT_XLNX_OUTPUT}"
-    # Remove the PL source from the source code (we want to upload bitstream at runtime)
-    sed -i '/#include "pl.dtsi"/d' system-top.dts
-    
-    # echo "Collecting DTS sources ..."
-    # TODO: Here we need to prepare the device tree from all DTSI
 
-    # Echo translating the Device Tree
-    gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/system-top.dts" -o "${DTS_TOP}"
-    dtc -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
+    echo "Preparing system top-level file ..."
+    cat system-top.dts "${SW_SOURCES}/device-tree-mods/system-user.dtsi" > user-patched-system-top.dts
+    cat pl.dtsi "${SW_SOURCES}/device-tree-mods/pl-custom.dtsi" > user-patched-pl.dts
+
+    echo "DTS ---> DTB blob generation ..."
+    gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-system-top.dts" -o "${DTS_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
+
+    gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-pl.dts" -o "${DTS_PL_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -I dts -O dtb -o "${DTB_PL_TOP}" "${DTS_PL_TOP}"
     popd
 }
 
@@ -234,6 +242,11 @@ function build_debian_rootfs () {
     # Copy Xilinx helping tools
     sudo cp -r "${XILINX_TOOLS}" "${DEBIAN_OUTPUT}/usr/src/"
     sudo cp -r "${SW_SOURCES}" "${DEBIAN_OUTPUT}/usr/src/pb-zybo"
+    # Copy FPGA bistream and device tree
+    sudo mkdir -p "${DEBIAN_OUTPUT}/lib/firmware/fpga"
+    fpga_bit_path="`find "${FPGA_PROJ_FOLDER}" -name board_design_wrapper.bin`"
+    sudo cp "${DTB_PL_TOP}" "${DEBIAN_OUTPUT}/lib/firmware/fpga/"
+    sudo cp "${fpga_bit_path}" "${DEBIAN_OUTPUT}/lib/firmware/fpga/"
 
     # Used in the case of non-persistent image
     echo "Copying data inside the chroot ..."
@@ -260,7 +273,6 @@ function build_bootloader () {
     cd "${OUT_FOLDER}"
     find "${FSBL_OUTPUT}" -name executable.elf -exec cp {} "${BOOTLOADER_OUTPUT}/fsbl.elf"  \;
     find "${UBOOT_OUTPUT}" -name u-boot.elf -exec cp {} "${BOOTLOADER_OUTPUT}" \;
-    cp "${DTB_TOP}" "${BOOTLOADER_OUTPUT}"
 
     cd "${BOOTLOADER_OUTPUT}"
     echo "Generaring the BOOT.BIN file (FSBL + U-Boot) ..."
@@ -277,7 +289,7 @@ function build_tarball () {
     FILES=("${DEBIAN_OUTPUT}/../${DEBIAN_ARCHIVE_FILE}" \
     "${BOOTLOADER_OUTPUT}/${DTB_FILE}" \
     "${BOOTLOADER_OUTPUT}/BOOT.BIN" \
-    "${BOOTLOADER_OUTPUT}/boot.scr")
+    "${BOOTLOADER_OUTPUT}/boot.scr" )
 
     for file in "${FILES[@]}"; do
         echo "Processing: ${file}"
