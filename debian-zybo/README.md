@@ -23,8 +23,17 @@ Booting:
 * https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842223/U-boot
 * https://github.com/Netgate/meta-ubmc/blob/master/scripts/uEnv.txt-example
 * https://www.denx.de/wiki/DULG/LinuxKernelArgs
+* https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841645/Solution+Zynq+PL+Programming+With+FPGA+Manager#SolutionZynqPLProgrammingWithFPGAManager-UsingDeviceTreeOverlay%3A
 
 
 * We need to create two partitions (one for boot and second for data)
     * Boot one will be vfat
     * Non-boot will ext4
+
+
+* Install
+    * Unpack the tarball
+    * Copy dtb files,boot.scr
+    * Mount the sd card - partition 1 FAT32 (boot), partition 2 ext4(rootfs), mount boot into rootfs/boot 
+    * `tar --preserve-permissions -xzvf output/tarball/debian-buster-rootfs-vanilla.tgz -C output/`
+    * Recursive umount and boot

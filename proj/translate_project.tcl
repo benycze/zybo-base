@@ -35,6 +35,6 @@ wait_on_run impl_1
 puts "INFO: Implementation done!"
 
 puts "INFO: Exporting the design to XSA: $xsa_file"
-write_hw_platform -fixed -force  -include_bit -file $xsa_file
+write_hw_platform -fixed -force -file $xsa_file
 
 puts "INFO: DONE!"

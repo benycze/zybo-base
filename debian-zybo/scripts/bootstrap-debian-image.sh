@@ -103,7 +103,7 @@ Description=Load the FPGA bitstream
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/fpgautil -b /lib/firmware/fpga/board_design_wrapper.bit.bin -o /lib/firmware/fpga/board_design_wrapper.bit.dtb
+ExecStart=/usr/bin/fpgautil -b /lib/firmware/fpga/board_design_wrapper.bit.bin -o /lib/firmware/fpga/board_design_wrapper.bit.bin.dtbo
 RemainAfterExit=true
 StandardOutput=journal
 
@@ -111,7 +111,7 @@ StandardOutput=journal
 WantedBy=multi-user.target
 EOT
 
-ln -s /etc/systemd/system/fpga.service /lib/systemd/system/fpga.service
+ln -s /etc/systemd/system/fpga.service /etc/systemd/system/multi-user.target.wants/fpga.service
 
 # Cleanup & finish
 apt-get clean

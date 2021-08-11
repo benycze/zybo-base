@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ $# -ne 2 ];then
+    echo "Usage: $0 <input-bit> <output-folder>"
+    exit 1
+fi
+
+file_in="$1"
+file_out="$2"
+tempdir=`mktemp -d`
+out_bin_file="board_design_wrapper.bit.bin"
+script_root=`dirname $(readlink -f $0)`
+
+echo "Converting ${file_in} --> ${file_out}/${out_bin_file}"
+
+cp "${file_in}" ${tempdir}/board_design_wrapper.bit
+cp "${script_root}/bitstream.bif" ${tempdir}/
+
+pushd .
+cd ${tempdir}
+bootgen -image bitstream.bif -arch zynq -process_bitstream bin -o ${out_bin_file} -w
+popd
+
+mv ${tempdir}/${out_bin_file} "${file_out}"
+rm -rf "${tempdir}"
+exit 0

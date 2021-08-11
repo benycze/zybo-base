@@ -32,7 +32,7 @@ DTC_FOLDER="${REPO_FOLDER}/dtc.git"
 DT_XLNX="${REPO_FOLDER}/device-tree-xlnx.git"
 DT_XLNX_OUTPUT="${OUT_FOLDER}/dts-zynq"
 DTB_FILE="zynq-debian.dtb"
-DTB_PL_FILE="board_design_wrapper.bit.dtb"
+DTB_PL_FILE="board_design_wrapper.bit.bin.dtbo"
 DTS_TOP="${DT_XLNX_OUTPUT}/zynq-debian.dts"
 DTS_PL_TOP="${DT_XLNX_OUTPUT}/fpga-pl.dts"
 DTB_TOP="${DT_XLNX_OUTPUT}/${DTB_FILE}"
@@ -217,10 +217,10 @@ function build_zynq_dts () {
 
     echo "DTS ---> DTB blob generation ..."
     gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-system-top.dts" -o "${DTS_TOP}"
-    dtc -i "${SW_SOURCES}/device-tree-mods" -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 --symbols -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
 
     gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-pl.dts" -o "${DTS_PL_TOP}"
-    dtc -i "${SW_SOURCES}/device-tree-mods" -I dts -O dtb -o "${DTB_PL_TOP}" "${DTS_PL_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 --symbols -I dts -O dtb -o "${DTB_PL_TOP}" "${DTS_PL_TOP}"
     popd
 }
 
@@ -244,7 +244,7 @@ function build_debian_rootfs () {
     sudo cp -r "${SW_SOURCES}" "${DEBIAN_OUTPUT}/usr/src/pb-zybo"
     # Copy FPGA bistream and device tree
     sudo mkdir -p "${DEBIAN_OUTPUT}/lib/firmware/fpga"
-    fpga_bit_path="`find "${FPGA_PROJ_FOLDER}" -name board_design_wrapper.bin`"
+    fpga_bit_path="`find "${FPGA_PROJ_FOLDER}" -name board_design_wrapper.bit.bin`"
     sudo cp "${DTB_PL_TOP}" "${DEBIAN_OUTPUT}/lib/firmware/fpga/"
     sudo cp "${fpga_bit_path}" "${DEBIAN_OUTPUT}/lib/firmware/fpga/"
 

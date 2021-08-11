@@ -1,0 +1,4 @@
+all:
+{
+    board_design_wrapper.bit
+}
