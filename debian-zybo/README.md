@@ -5,6 +5,7 @@
 You need to install following packages (my system is Debian Linux, stable):
 
 * Flex
+* git
 * Bison
 * build-essential
 * qemu-user-static
@@ -87,7 +88,14 @@ was successfully configured.
 ![linux-boot](fig/deb-boot.png)
 ![zybo-board](fig/board-on.jpg)
 
-ENJOY!
+Default passwords and users:
+
+* user: *root*, password: *root*
+* user: *fpga*, password: *fpga*
+
+Also notice you are using this on your own risk!
+
+Enjoy!
 
 ## References
 
