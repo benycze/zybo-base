@@ -45,6 +45,12 @@ or
 Helping scripts are really small and they doesn't check if any file was modified. They are here just for the case that you
 don't want to write the command by hand.
 
+Currently supported Linux Distributions:
+
+* Petalinux (default one) - presented on this page because this is being supported by Xilinx
+* Debian Linux :-) - you can also use the standard Debian distribution with Linux kernel (patched by Xilinx). 
+Documentation is [here](debian-zybo).
+
 ## How to translate the Petalinux
 
 Petalinux project for Zybo board is inside the `petalinux-zybo` folder. It contains a helping script which is capable to configure HW
@@ -166,7 +172,7 @@ space also contains the PL (programmable logic) which starts on the 0x4000_0000 
 
 ## How to debug the Linux Kernel
 
-The simplest possibility is to use the [KGDB](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/gdb-kernel-debugging.html#:~:text=The%20kernel%20debugger%20kgdb%2C%20hypervisors,simplify%20typical%20kernel%20debugging%20steps.) approach which is known quite well from the
+The simplest possibility is to use the [KGDB - usage](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/gdb-kernel-debugging.html#:~:text=The%20kernel%20debugger%20kgdb%2C%20hypervisors,simplify%20typical%20kernel%20debugging%20steps.), [KGDB - overall info](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/kgdb.html) approach which is known quite well from the
 Linux world. First of all, we need to configure the kernel. To achieve this, run the
 `petalinux-config -c kernel` and set the following variables (everything is in the
 `Kernel hacking` submenu).
