@@ -23,7 +23,7 @@ DEB_PACKAGES="openssh-server vim build-essential cmake git device-tree-compiler 
     initramfs-tools net-tools resolvconf sudo less hwinfo tcsh zsh file pkg-config u-boot-tools libssl-dev \
     socat python  python-dev  python-setuptools  python-wheel  python-pip \
     python3 python3-dev python3-setuptools python3-wheel python3-pip python-numpy python3-numpy \
-    screen bash-completion haveged" 
+    screen bash-completion haveged gdbserver" 
 
 echo "Setting APT and installing packages ..."
 

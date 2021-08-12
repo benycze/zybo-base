@@ -13,17 +13,18 @@ set -e
 # #######################################################################################
 # Configuration
 # #######################################################################################
-
+# Project root folder
+PROJ_ROOT=`dirname $(readlink -f $0)`
 # Folder with downloaded repos
-REPO_FOLDER="`pwd`/reps"
+REPO_FOLDER="${PROJ_ROOT}/reps"
 # Folder with output data
-OUT_FOLDER="`pwd`/output"
+OUT_FOLDER="${PROJ_ROOT}/output"
 # Configuration folder
-CONF_FOLDER="`pwd`/conf"
+CONF_FOLDER="${PROJ_ROOT}/conf"
 # Folder with scripts
-SCRIPT_FOLDER="`pwd`/scripts"
+SCRIPT_FOLDER="${PROJ_ROOT}/scripts"
 # Xilinx tools
-XILINX_TOOLS="`pwd`/xilinx-tools"
+XILINX_TOOLS="${PROJ_ROOT}/xilinx-tools"
 # Output folder for the FSBL
 FSBL_OUTPUT="${OUT_FOLDER}/fsbl"
 # DTC folder
@@ -39,7 +40,7 @@ DTB_TOP="${DT_XLNX_OUTPUT}/${DTB_FILE}"
 DTB_PL_TOP="${DT_XLNX_OUTPUT}/${DTB_PL_FILE}"
 # FPGA bitstream name
 FPGA_BIN="board_design_wrapper.bit.bin"
-FPGA_PROJ_FOLDER="`pwd`/../proj"
+FPGA_PROJ_FOLDER="${PROJ_ROOT}/../proj"
 # U-Boot folder
 UBOOT_FOLDER="${REPO_FOLDER}/u-boot-xlnx.git"
 UBOOT_OUTPUT="${OUT_FOLDER}/uboot"
@@ -52,7 +53,7 @@ BOOTLOADER_OUTPUT="${OUT_FOLDER}/bootloader"
 # Tarball folder
 TARBALL_OUTPUT="${OUT_FOLDER}/tarball"
 # Root folder with project sources
-SW_SOURCES="`pwd`/../sw-sources"
+SW_SOURCES="${PROJ_ROOT}/../sw-sources"
 
 # Rootfs configuration
 DEBIAN_OUTPUT="${OUT_FOLDER}/debian10-rootfs/root"
@@ -132,7 +133,7 @@ function build_fsbl () {
         exit 1
     fi
 
-    xsct scripts/generate-fsbl.tcl "$xsa_file" "$output_folder"
+    xsct "${SCRIPT_FOLDER}/generate-fsbl.tcl" "$xsa_file" "$output_folder"
     pushd .
     cd "${output_folder}"
     make CFLAGS=-DFSBL_DEBUG_INFO
@@ -195,13 +196,13 @@ function build_zynq_dts () {
     print_boxed "Build Zynq DTS"
     mkdir -p "${DT_XLNX_OUTPUT}"
 
-    xsa_file="`find ../proj/*.xsa -exec realpath {} \;`"
+    xsa_file="$(find "${FPGA_PROJ_FOLDER}" -name "*.xsa" -exec realpath {} \;)"
     if [ -z "${xsa_file}" ]; then
         echo "XSA file doesn't exist - cannot generate the FSBL"
         exit 1
     fi
 
-    xsct scripts/generate-dts.tcl "$xsa_file" "$DT_XLNX_OUTPUT" "$DT_XLNX"
+    xsct "${SCRIPT_FOLDER}/generate-dts.tcl" "$xsa_file" "$DT_XLNX_OUTPUT" "$DT_XLNX"
 
     echo "Translating to DTB ..."
     echo "  * DTS File = ${DTS_TOP}"
@@ -217,10 +218,10 @@ function build_zynq_dts () {
 
     echo "DTS ---> DTB blob generation ..."
     gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-system-top.dts" -o "${DTS_TOP}"
-    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 --symbols -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 -@ -I dts -O dtb -o "${DTB_TOP}" "${DTS_TOP}"
 
     gcc -I "${DT_XLNX_OUTPUT}" -E -nostdinc -undef -D__DTS__ -x assembler-with-cpp "${DT_XLNX_OUTPUT}/user-patched-pl.dts" -o "${DTS_PL_TOP}"
-    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 --symbols -I dts -O dtb -o "${DTB_PL_TOP}" "${DTS_PL_TOP}"
+    dtc -i "${SW_SOURCES}/device-tree-mods" -b 0 -@ -I dts -O dtb -o "${DTB_PL_TOP}" "${DTS_PL_TOP}"
     popd
 }
 
@@ -287,7 +288,7 @@ function build_tarball () {
     mkdir -p "${TARBALL_OUTPUT}"
 
     FILES=("${DEBIAN_OUTPUT}/../${DEBIAN_ARCHIVE_FILE}" \
-    "${BOOTLOADER_OUTPUT}/${DTB_FILE}" \
+    "${DTB_TOP}" \
     "${BOOTLOADER_OUTPUT}/BOOT.BIN" \
     "${BOOTLOADER_OUTPUT}/boot.scr" )
 
@@ -385,7 +386,7 @@ if [ "${p_build_boot}" -eq 1 ] || [ ! -e "${BOOTLOADER_OUTPUT}" ]; then
     build_bootloader
 fi
 
-if [ "${p_tarball}" -eq 1 ] || [ ! -e "${TARBALL_OUTPUT}" ]; then
+if [ "${p_tarball}" -eq 1 ]; then
     build_tarball
 fi
 

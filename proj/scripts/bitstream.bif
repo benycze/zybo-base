@@ -1,3 +1,12 @@
+// -------------------------------------------------------------------------------
+//  PROJECT: Zybo Base
+// -------------------------------------------------------------------------------
+//  AUTHORS: Pavel Benacek <pavel.benacek@gmail.com>
+//  LICENSE: The MIT License (MIT), please read LICENSE file
+//  WEBSITE: https://github.com/benycze/zybo-base
+// -------------------------------------------------------------------------------
+//
+
 all:
 {
     board_design_wrapper.bit
