@@ -47,8 +47,8 @@ don't want to write the command by hand.
 
 Currently supported Linux Distributions:
 
-* Petalinux (default one) - presented on this page because this is being supported by Xilinx
-* Debian Linux :-) - you can also use the standard Debian distribution with Linux kernel (patched by Xilinx). 
+* _Petalinux (default one)_ - presented on this page because this is being supported by Xilinx
+* _Debian Linux_ - you can also use the standard Debian distribution with Linux kernel (patched by Xilinx). 
 Documentation is [here](debian-zybo).
 
 ## How to translate the Petalinux
