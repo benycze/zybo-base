@@ -56,8 +56,8 @@ TARBALL_OUTPUT="${OUT_FOLDER}/tarball"
 SW_SOURCES="${PROJ_ROOT}/../sw-sources"
 
 # Rootfs configuration
-DEBIAN_OUTPUT="${OUT_FOLDER}/debian10-rootfs/root"
-DEBIAN_DISTRO=buster
+DEBIAN_OUTPUT="${OUT_FOLDER}/debian-rootfs/root"
+DEBIAN_DISTRO=bullseye
 DEBIAN_ARCHIVE_FILE="debian-${DEBIAN_DISTRO}-rootfs-vanilla.tgz"
 
 # Cross-compiler configuration
@@ -229,9 +229,10 @@ function build_debian_rootfs () {
     print_boxed "Build Debian rootfs"
 
     pushd .
-    echo "Bootstraping initial system ..."
+    echo "Bootstraping initial system - Debian ${DEBIAN_DISTRO} ..."
     sudo rm -rf "${DEBIAN_OUTPUT}"
     mkdir -p "${DEBIAN_OUTPUT}"
+    sudo chown 0:0 "${DEBIAN_OUTPUT}"
     sudo debootstrap --arch=armhf --foreign "${DEBIAN_DISTRO}" "${DEBIAN_OUTPUT}"
     sudo cp `which qemu-arm-static` "${DEBIAN_OUTPUT}/usr/bin"
 
@@ -251,7 +252,7 @@ function build_debian_rootfs () {
 
     # Used in the case of non-persistent image
     echo "Copying data inside the chroot ..."
-    cp "${SCRIPT_FOLDER}/bootstrap-debian-image.sh" "${DEBIAN_OUTPUT}"
+    sudo cp "${SCRIPT_FOLDER}/bootstrap-debian-image.sh" "${DEBIAN_OUTPUT}"
 
     echo "Running chroot ..."
     sudo chroot "${DEBIAN_OUTPUT}" /bin/bash -c "bash /bootstrap-debian-image.sh ${DEBIAN_DISTRO}"

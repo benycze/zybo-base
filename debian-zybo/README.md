@@ -14,7 +14,7 @@ You need to install following packages (my system is Debian Linux, stable):
 
 You also need to have to cross-compiler tools installed on your system. In my case, I have chosen the toolchain
 from Vitis (because it is already there and I have sourced them into PATH; details about Vivado version
-is root of this repo) but you can also try to install the gcc-arm-linux-gnueabihf package and try the build.
+is in the root of this repo) but you can also try to install the gcc-arm-linux-gnueabihf package and try the build.
 
 ## Time to build Debian image
 

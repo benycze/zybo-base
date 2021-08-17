@@ -21,8 +21,7 @@ export LANG=en_US.UTF-8
 
 DEB_PACKAGES="openssh-server vim build-essential cmake git device-tree-compiler mc htop gdb gdb-doc \
     initramfs-tools net-tools resolvconf sudo less hwinfo tcsh zsh file pkg-config u-boot-tools libssl-dev \
-    socat python  python-dev  python-setuptools  python-wheel  python-pip \
-    python3 python3-dev python3-setuptools python3-wheel python3-pip python-numpy python3-numpy \
+    socat python3 python3-dev python3-setuptools python3-wheel python3-pip python3-numpy \
     screen bash-completion haveged gdbserver" 
 
 echo "Setting APT and installing packages ..."
@@ -32,8 +31,8 @@ deb     http://ftp.cz.debian.org/debian            ${distro}         main contri
 deb-src http://ftp.cz.debian.org/debian            ${distro}         main contrib non-free
 deb     http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free
 deb-src http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free
-deb     http://security.debian.org/debian-security ${distro}/updates main contrib non-free
-deb-src http://security.debian.org/debian-security ${distro}/updates main contrib non-free
+deb     http://deb.debian.org/debian-security      ${distro}-security main contrib non-free
+deb-src http://deb.debian.org/debian-security      ${distro}-security main contrib non-free
 EOT
 
 cat <<EOT > /etc/apt/apt.conf.d/71-no-recommends
