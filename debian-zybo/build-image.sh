@@ -93,6 +93,7 @@ function print_usage {
     echo "-b         => buld bootloader"
     echo "-o         => build the Debian Rootfs"
     echo "-t         => build the tarball"
+    echo "-j         => number of build jobs (${JOBS} by default)"
     echo ""
     echo "The interactive mode is started if you don't pass any argument."
 }
@@ -188,7 +189,7 @@ function build_kernel () {
     echo "Patching the defualt configuration ..."
     scripts/kconfig/merge_config.sh -m -O "${KERNEL_OUTPUT}" "${KERNEL_OUTPUT}/.config" "${SW_SOURCES}/kernel-config/*.cfg"
 
-    make O="${KERNEL_OUTPUT}" bindeb-pkg
+    make O="${KERNEL_OUTPUT}" -j${JOBS} bindeb-pkg
     popd
 }
 
@@ -317,7 +318,7 @@ p_build_dts=0
 p_build_rootfs=0
 p_build_boot=0
 p_tarball=0
-while getopts "hsfrukdobxt" opt; do
+while getopts "hsfrukdobxtj:" opt; do
     case "$opt" in
     h)  print_usage
         exit 0
@@ -340,6 +341,13 @@ while getopts "hsfrukdobxt" opt; do
         ;;
     t) p_tarball=1
         ;;
+    j) if [ -z "${OPTARG##*[!0-9]*}" ];then
+            echo "Number of jobs can be integer only!"
+            exit 1
+       fi
+
+       JOBS=${OPTARG}
+        ;;
     esac
 done
 shift $((OPTIND -1))
@@ -356,6 +364,8 @@ if [ "${p_rebuild_all}" -eq 1 ]; then
     echo "Cleaning output folder (${OUT_FOLDER}) ..."
     sudo rm -rf "${OUT_FOLDER}"
 fi
+
+echo "Number of build jobs: ${JOBS}"
 
 if [ "${p_build_fsbl}" -eq 1 ] || [ ! -e "${FSBL_OUTPUT}" ]; then
     build_fsbl
