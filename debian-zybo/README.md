@@ -11,6 +11,8 @@ You need to install following packages (my system is Debian Linux, stable):
 * qemu-user-static
 * debootstrap
 * binfmt-support
+* uuid-dev
+* libgnutls28-dev
 
 You also need to have to cross-compiler tools installed on your system. In my case, I have chosen the toolchain
 from Vitis (because it is already there and I have sourced them into PATH; details about Vivado version
