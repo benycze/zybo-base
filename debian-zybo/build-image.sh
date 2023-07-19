@@ -57,7 +57,7 @@ SW_SOURCES="${PROJ_ROOT}/../sw-sources"
 
 # Rootfs configuration
 DEBIAN_OUTPUT="${OUT_FOLDER}/debian-rootfs/root"
-DEBIAN_DISTRO=bullseye
+DEBIAN_DISTRO=bookworm
 DEBIAN_ARCHIVE_FILE="debian-${DEBIAN_DISTRO}-rootfs-vanilla.tgz"
 
 # Cross-compiler configuration

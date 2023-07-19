@@ -54,7 +54,7 @@ Seems like you were able to format and mount all partitions :-). The next step i
 (from the build stage) into mounted folders. You can check the output using the `ls root_part` you should see the standard folder structure in Linux system.
 
 ```bash
-tar --preserve-permissions -xzvf output/tarball/debian-bullseye-rootfs-vanilla.tgz -C root_part
+tar --preserve-permissions -xzvf output/tarball/debian-bookworm-rootfs-vanilla.tgz -C root_part
 ```
 
 The next step is to several files from the tarball folder into the `root_part/boot` directory.

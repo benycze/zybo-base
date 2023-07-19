@@ -19,7 +19,7 @@ export LANG=en_US.UTF-8
 # Package installation
 # #######################################################################################
 
-DEB_PACKAGES="openssh-server vim build-essential cmake git device-tree-compiler mc htop gdb gdb-doc \
+DEB_PACKAGES="openssh-server vim build-essential cmake git device-tree-compiler mc htop gdb \
     initramfs-tools net-tools resolvconf sudo less hwinfo tcsh zsh file pkg-config u-boot-tools libssl-dev \
     socat python3 python3-dev python3-setuptools python3-wheel python3-pip python3-numpy \
     screen bash-completion haveged gdbserver" 
@@ -27,12 +27,12 @@ DEB_PACKAGES="openssh-server vim build-essential cmake git device-tree-compiler 
 echo "Setting APT and installing packages ..."
 
 cat <<EOT > /etc/apt/sources.list
-deb     http://ftp.cz.debian.org/debian            ${distro}         main contrib non-free
-deb-src http://ftp.cz.debian.org/debian            ${distro}         main contrib non-free
-deb     http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free
-deb-src http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free
-deb     http://deb.debian.org/debian-security      ${distro}-security main contrib non-free
-deb-src http://deb.debian.org/debian-security      ${distro}-security main contrib non-free
+deb     http://ftp.cz.debian.org/debian            ${distro}         main contrib non-free-firmware
+deb-src http://ftp.cz.debian.org/debian            ${distro}         main contrib non-free-firmware
+deb     http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free-firmware
+deb-src http://ftp.cz.debian.org/debian            ${distro}-updates main contrib non-free-firmware
+deb     http://deb.debian.org/debian-security      ${distro}-security main contrib non-free-firmware
+deb-src http://deb.debian.org/debian-security      ${distro}-security main contrib non-free-firmware
 EOT
 
 cat <<EOT > /etc/apt/apt.conf.d/71-no-recommends
