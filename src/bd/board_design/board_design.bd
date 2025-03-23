@@ -1,12 +1,12 @@
 {
   "design": {
     "design_info": {
-      "boundary_crc": "0x9ADECEABB8B4EA56",
+      "boundary_crc": "0x9ADECEAB168E1FE2",
       "device": "xc7z020clg400-1",
       "name": "board_design",
       "rev_ctrl_bd_flag": "RevCtrlBdOff",
       "synth_flow_mode": "Hierarchical",
-      "tool_version": "2023.1",
+      "tool_version": "2024.2.2",
       "validated": "true"
     },
     "design_tree": {
@@ -231,6 +231,7 @@
     "components": {
       "axi_led_pwm": {
         "vlnv": "digilentinc.com:IP:PWM:2.0",
+        "ip_revision": "10",
         "xci_name": "board_design_PWM_0_0",
         "xci_path": "ip/board_design_PWM_0_0/board_design_PWM_0_0.xci",
         "inst_hier_path": "axi_led_pwm",
@@ -242,6 +243,7 @@
       },
       "processing_system7_0": {
         "vlnv": "xilinx.com:ip:processing_system7:5.5",
+        "ip_revision": "6",
         "xci_name": "board_design_processing_system7_0_0",
         "xci_path": "ip/board_design_processing_system7_0_0/board_design_processing_system7_0_0.xci",
         "inst_hier_path": "processing_system7_0",
@@ -2009,12 +2011,14 @@
       },
       "rst_ps7_0_100M": {
         "vlnv": "xilinx.com:ip:proc_sys_reset:5.0",
+        "ip_revision": "16",
         "xci_name": "board_design_rst_ps7_0_100M_1",
         "xci_path": "ip/board_design_rst_ps7_0_100M_1/board_design_rst_ps7_0_100M_1.xci",
         "inst_hier_path": "rst_ps7_0_100M"
       },
       "axi_gpio_led": {
         "vlnv": "xilinx.com:ip:axi_gpio:2.0",
+        "ip_revision": "36",
         "xci_name": "board_design_axi_gpio_0_0",
         "xci_path": "ip/board_design_axi_gpio_0_0/board_design_axi_gpio_0_0.xci",
         "inst_hier_path": "axi_gpio_led",
@@ -2029,6 +2033,7 @@
       },
       "axi_gpio_sw": {
         "vlnv": "xilinx.com:ip:axi_gpio:2.0",
+        "ip_revision": "36",
         "xci_name": "board_design_axi_gpio_1_0",
         "xci_path": "ip/board_design_axi_gpio_1_0/board_design_axi_gpio_1_0.xci",
         "inst_hier_path": "axi_gpio_sw",
@@ -2155,8 +2160,9 @@
         "components": {
           "xbar": {
             "vlnv": "xilinx.com:ip:axi_crossbar:2.1",
-            "xci_name": "board_design_xbar_0",
-            "xci_path": "ip/board_design_xbar_0/board_design_xbar_0.xci",
+            "ip_revision": "36",
+            "xci_name": "board_design_axi_interconnect_periph_0_upgraded_ipi_imp_xbar_0",
+            "xci_path": "ip/board_design_axi_interconnect_periph_0_upgraded_ipi_imp_xbar_0/board_design_axi_interconnect_periph_0_upgraded_ipi_imp_xbar_0.xci",
             "inst_hier_path": "axi_interconnect_periph_0/xbar",
             "parameters": {
               "NUM_MI": {
@@ -2231,8 +2237,9 @@
             "components": {
               "auto_pc": {
                 "vlnv": "xilinx.com:ip:axi_protocol_converter:2.1",
-                "xci_name": "board_design_auto_pc_0",
-                "xci_path": "ip/board_design_auto_pc_0/board_design_auto_pc_0.xci",
+                "ip_revision": "35",
+                "xci_name": "board_design_axi_interconnect_periph_0_imp_auto_pc_0",
+                "xci_path": "ip/board_design_axi_interconnect_periph_0_imp_auto_pc_0/board_design_axi_interconnect_periph_0_imp_auto_pc_0.xci",
                 "inst_hier_path": "axi_interconnect_periph_0/s00_couplers/auto_pc",
                 "parameters": {
                   "MI_PROTOCOL": {
@@ -2595,14 +2602,14 @@
           "processing_system7_0/FCLK_CLK0",
           "axi_led_pwm/pwm_axi_aclk",
           "processing_system7_0/M_AXI_GP0_ACLK",
-          "rst_ps7_0_100M/slowest_sync_clk",
           "axi_gpio_led/s_axi_aclk",
           "axi_gpio_sw/s_axi_aclk",
           "axi_interconnect_periph_0/ACLK",
           "axi_interconnect_periph_0/S00_ACLK",
           "axi_interconnect_periph_0/M00_ACLK",
           "axi_interconnect_periph_0/M01_ACLK",
-          "axi_interconnect_periph_0/M02_ACLK"
+          "axi_interconnect_periph_0/M02_ACLK",
+          "rst_ps7_0_100M/slowest_sync_clk"
         ]
       },
       "processing_system7_0_FCLK_RESET0_N": {
