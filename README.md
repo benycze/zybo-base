@@ -5,7 +5,7 @@ It can be also considered as tutorial for Zybo Z7-20 board (or Zynq based images
 
 **Required tools:**
 
-* Vivado 2023.2 for bitstream build
+* Vivado 2024.2 for bitstream build
 * Vivado 2020.2 for Petalinux build (not tested for a longer time so it might require some corrections)
 * Petalinux 2020.2
 
