@@ -4,7 +4,7 @@
     "xci_name": "board_design_axi_gpio_1_0",
     "cell_name": "axi_gpio_sw",
     "component_reference": "xilinx.com:ip:axi_gpio:2.0",
-    "ip_revision": "36",
+    "ip_revision": "38",
     "gen_directory": ".",
     "parameters": {
       "component_parameters": {
@@ -43,50 +43,50 @@
         "C_TRI_DEFAULT_2": [ { "value": "0xFFFFFFFF", "resolve_type": "generated", "format": "bitString", "usage": "all" } ]
       },
       "project_parameters": {
-        "ARCHITECTURE": [ { "value": "zynq" } ],
-        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.2" } ],
-        "BOARD_CONNECTIONS": [ { "value": "" } ],
-        "DEVICE": [ { "value": "xc7z020" } ],
-        "PACKAGE": [ { "value": "clg400" } ],
-        "PREFHDL": [ { "value": "VERILOG" } ],
-        "SILICON_REVISION": [ { "value": "" } ],
-        "SIMULATOR_LANGUAGE": [ { "value": "MIXED" } ],
-        "SPEEDGRADE": [ { "value": "-1" } ],
-        "STATIC_POWER": [ { "value": "" } ],
-        "TEMPERATURE_GRADE": [ { "value": "" } ]
+        "ARCHITECTURE": [ { "value": "zynq", "resolve_type": "generated", "usage": "all" } ],
+        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.2", "resolve_type": "generated", "usage": "all" } ],
+        "BOARD_CONNECTIONS": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "DEVICE": [ { "value": "xc7z020", "resolve_type": "generated", "usage": "all" } ],
+        "PACKAGE": [ { "value": "clg400", "resolve_type": "generated", "usage": "all" } ],
+        "PREFHDL": [ { "value": "VERILOG", "resolve_type": "generated", "usage": "all" } ],
+        "SILICON_REVISION": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "SIMULATOR_LANGUAGE": [ { "value": "MIXED", "resolve_type": "generated", "usage": "all" } ],
+        "SPEEDGRADE": [ { "value": "-1", "resolve_type": "generated", "usage": "all" } ],
+        "STATIC_POWER": [ { "value": "", "resolve_type": "generated", "usage": "all" } ],
+        "TEMPERATURE_GRADE": [ { "value": "", "resolve_type": "generated", "usage": "all" } ]
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
-        "IPREVISION": [ { "value": "36" } ],
+        "IPREVISION": [ { "value": "38" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "../../ipshared" } ],
-        "SWVERSION": [ { "value": "2024.2.2" } ],
+        "SWVERSION": [ { "value": "2026.1" } ],
         "SYNTHESISFLOW": [ { "value": "OUT_OF_CONTEXT" } ]
       }
     },
     "boundary": {
       "ports": {
-        "s_axi_aclk": [ { "direction": "in", "driver_value": "0" } ],
-        "s_axi_aresetn": [ { "direction": "in", "driver_value": "1" } ],
-        "s_axi_awaddr": [ { "direction": "in", "size_left": "8", "size_right": "0", "driver_value": "0" } ],
-        "s_axi_awvalid": [ { "direction": "in", "driver_value": "0" } ],
+        "s_axi_aclk": [ { "direction": "in", "driver_value": "0x0" } ],
+        "s_axi_aresetn": [ { "direction": "in", "driver_value": "0x1" } ],
+        "s_axi_awaddr": [ { "direction": "in", "size_left": "8", "size_right": "0", "driver_value": "0x00000000" } ],
+        "s_axi_awvalid": [ { "direction": "in", "driver_value": "0x0" } ],
         "s_axi_awready": [ { "direction": "out" } ],
-        "s_axi_wdata": [ { "direction": "in", "size_left": "31", "size_right": "0", "driver_value": "0" } ],
-        "s_axi_wstrb": [ { "direction": "in", "size_left": "3", "size_right": "0", "driver_value": "0" } ],
-        "s_axi_wvalid": [ { "direction": "in", "driver_value": "0" } ],
+        "s_axi_wdata": [ { "direction": "in", "size_left": "31", "size_right": "0", "driver_value": "0x00000000" } ],
+        "s_axi_wstrb": [ { "direction": "in", "size_left": "3", "size_right": "0", "driver_value": "0x0" } ],
+        "s_axi_wvalid": [ { "direction": "in", "driver_value": "0x0" } ],
         "s_axi_wready": [ { "direction": "out" } ],
         "s_axi_bresp": [ { "direction": "out", "size_left": "1", "size_right": "0" } ],
         "s_axi_bvalid": [ { "direction": "out" } ],
-        "s_axi_bready": [ { "direction": "in", "driver_value": "0" } ],
-        "s_axi_araddr": [ { "direction": "in", "size_left": "8", "size_right": "0", "driver_value": "0" } ],
-        "s_axi_arvalid": [ { "direction": "in", "driver_value": "0" } ],
+        "s_axi_bready": [ { "direction": "in", "driver_value": "0x0" } ],
+        "s_axi_araddr": [ { "direction": "in", "size_left": "8", "size_right": "0", "driver_value": "0x00000000" } ],
+        "s_axi_arvalid": [ { "direction": "in", "driver_value": "0x0" } ],
         "s_axi_arready": [ { "direction": "out" } ],
         "s_axi_rdata": [ { "direction": "out", "size_left": "31", "size_right": "0" } ],
         "s_axi_rresp": [ { "direction": "out", "size_left": "1", "size_right": "0" } ],
         "s_axi_rvalid": [ { "direction": "out" } ],
-        "s_axi_rready": [ { "direction": "in", "driver_value": "0" } ],
+        "s_axi_rready": [ { "direction": "in", "driver_value": "0x0" } ],
         "gpio_io_i": [ { "direction": "in", "size_left": "3", "size_right": "0", "driver_value": "0" } ]
       },
       "interfaces": {
@@ -117,8 +117,8 @@
             "HAS_BRESP": [ { "value": "1", "value_src": "constant", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
             "HAS_RRESP": [ { "value": "1", "value_src": "constant", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
             "SUPPORTS_NARROW_BURST": [ { "value": "0", "value_src": "ip_propagated", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
-            "NUM_READ_OUTSTANDING": [ { "value": "2", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
-            "NUM_WRITE_OUTSTANDING": [ { "value": "2", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
+            "NUM_READ_OUTSTANDING": [ { "value": "1", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
+            "NUM_WRITE_OUTSTANDING": [ { "value": "1", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
             "MAX_BURST_LENGTH": [ { "value": "1", "value_src": "ip_propagated", "value_permission": "bd", "resolve_type": "generated", "format": "long", "is_ips_inferred": true, "is_static_object": false } ],
             "PHASE": [ { "value": "0.0", "value_permission": "bd", "resolve_type": "generated", "format": "float", "is_ips_inferred": true, "is_static_object": false } ],
             "CLK_DOMAIN": [ { "value": "board_design_processing_system7_0_0_FCLK_CLK0", "value_src": "default_prop", "value_permission": "bd", "resolve_type": "generated", "is_ips_inferred": true, "is_static_object": false } ],
@@ -235,7 +235,7 @@
                       "bit_offset": 0,
                       "bit_width": 4,
                       "display_name": "Channel_1_GPIO_DATA",
-                      "description": "AXI GPIO 3-State Control Register\nEach I/O pin of the AXI GPIO is individually programmable as an input or output   For each of the bits     0 - I/O pin configured as output     1 - I/O pin configured as input\n",
+                      "description": "AXI GPIO 3-State Control Register\nEach I/O pin of the AXI GPIO is individually programmable as an input or output\n  For each of the bits\n    0 - I/O pin configured as output\n    1 - I/O pin configured as input\n",
                       "is_volatile": true,
                       "access": "read-write"
                     }
@@ -273,7 +273,7 @@
                       "bit_offset": 0,
                       "bit_width": 32,
                       "display_name": "Channel_2_GPIO_DATA",
-                      "description": "AXI GPIO 3-State Control Register\nEach I/O pin of the AXI GPIO is individually programmable as an input or output   For each of the bits     0 - I/O pin configured as output     1 - I/O pin configured as input\n",
+                      "description": "AXI GPIO 3-State Control Register\nEach I/O pin of the AXI GPIO is individually programmable as an input or output\n  For each of the bits\n    0 - I/O pin configured as output\n    1 - I/O pin configured as input\n",
                       "is_volatile": true,
                       "access": "read-write"
                     }
@@ -358,5 +358,6 @@
         }
       }
     }
-  }
+  },
+  "checksum": "f853fd63"
 }

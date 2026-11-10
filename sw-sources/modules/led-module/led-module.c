@@ -20,6 +20,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/version.h>
 #include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/platform_device.h>
@@ -333,7 +334,11 @@ static int led_module_cdev_init(struct platform_device *pdev) {
 	dev_info(dev, "cdev init MAJOR=%d and MINOR=%d\n",n_major, n_minor);
 
 	/* create sysfs class to have easier access to it */
-    lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+	lp->sysclass = class_create(DRIVER_SYSFS_CLASS);
+#else
+	lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#endif
 	if (IS_ERR(lp->sysclass)) {
 		dev_err(dev, "error during the sysfs class creation\n");
 		rc = -EFAULT;
@@ -457,7 +462,7 @@ mem_region_err:
 	return rc;
 }
 
-static int led_module_remove(struct platform_device *pdev) {
+static void led_module_remove(struct platform_device *pdev) {
 	struct device *dev = &pdev->dev;
 	struct led_module_local *lp = dev_get_drvdata(dev);
 	dev_info(dev, "led-module is being removed.\n");
@@ -466,7 +471,6 @@ static int led_module_remove(struct platform_device *pdev) {
 	release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
 	kfree(lp);
 	dev_set_drvdata(dev, NULL);
-	return 0;
 }
 
 /**

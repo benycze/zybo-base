@@ -5,5 +5,9 @@ version="$1"
 echo "${version}" > /tmp/uimage-gen
 
 # Generate image for kernel and initramdisk
-/usr/bin/mkimage -A arm -O linux -T kernel -C none -n "Linux Kernel" -a 0x00008000 -e 0x00008000 -d /boot/vmlinuz-${version} /boot/uImage
-/usr/bin/mkimage -A arm -T ramdisk -C gzip -n "Linux initramdisk" -d /boot/initrd.img-${version} /boot/initramdisk.image.gz
+if [ -f "/boot/vmlinuz-${version}" ]; then
+    /usr/bin/mkimage -A arm -O linux -T kernel -C none -n "Linux Kernel" -a 0x00008000 -e 0x00008000 -d "/boot/vmlinuz-${version}" /boot/uImage
+fi
+if [ -f "/boot/initrd.img-${version}" ]; then
+    /usr/bin/mkimage -A arm -T ramdisk -C gzip -n "Linux initramdisk" -d "/boot/initrd.img-${version}" /boot/initramdisk.image.gz
+fi

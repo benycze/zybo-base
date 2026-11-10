@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	page_offset=addr-page_addr;
 
 	ptr=mmap(NULL,page_size,PROT_READ,MAP_SHARED,fd,(addr & ~(page_size-1)));
-	if((int)ptr==-1) {
+	if(ptr == MAP_FAILED) {
 		perror(argv[0]);
 		exit(-1);
 	}

@@ -23,17 +23,17 @@
         "POLARITY": [ { "value": "\"1\"", "resolve_type": "generated", "format": "bitString", "usage": "all" } ]
       },
       "project_parameters": {
-        "ARCHITECTURE": [ { "value": "zynq" } ],
-        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.0" } ],
-        "BOARD_CONNECTIONS": [ { "value": "" } ],
-        "DEVICE": [ { "value": "xc7z020" } ],
-        "PACKAGE": [ { "value": "clg400" } ],
-        "PREFHDL": [ { "value": "VERILOG" } ],
-        "SILICON_REVISION": [ { "value": "" } ],
-        "SIMULATOR_LANGUAGE": [ { "value": "MIXED" } ],
-        "SPEEDGRADE": [ { "value": "-1" } ],
-        "STATIC_POWER": [ { "value": "" } ],
-        "TEMPERATURE_GRADE": [ { "value": "" } ]
+        "ARCHITECTURE": [ { "value": "zynq", "usage": "all" } ],
+        "BASE_BOARD_PART": [ { "value": "digilentinc.com:zybo-z7-20:part0:1.0", "usage": "all" } ],
+        "BOARD_CONNECTIONS": [ { "value": "", "usage": "all" } ],
+        "DEVICE": [ { "value": "xc7z020", "usage": "all" } ],
+        "PACKAGE": [ { "value": "clg400", "usage": "all" } ],
+        "PREFHDL": [ { "value": "VERILOG", "usage": "all" } ],
+        "SILICON_REVISION": [ { "value": "", "usage": "all" } ],
+        "SIMULATOR_LANGUAGE": [ { "value": "MIXED", "usage": "all" } ],
+        "SPEEDGRADE": [ { "value": "-1", "usage": "all" } ],
+        "STATIC_POWER": [ { "value": "", "usage": "all" } ],
+        "TEMPERATURE_GRADE": [ { "value": "", "usage": "all" } ]
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
@@ -42,7 +42,7 @@
         "OUTPUTDIR": [ { "value": "." } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
         "SHAREDDIR": [ { "value": "../../ipshared" } ],
-        "SWVERSION": [ { "value": "2024.2.2" } ],
+        "SWVERSION": [ { "value": "2026.1" } ],
         "SYNTHESISFLOW": [ { "value": "OUT_OF_CONTEXT" } ]
       }
     },
@@ -181,5 +181,6 @@
         }
       }
     }
-  }
+  },
+  "checksum": "9fccc103"
 }

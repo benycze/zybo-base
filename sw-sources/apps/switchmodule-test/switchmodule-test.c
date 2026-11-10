@@ -18,13 +18,13 @@
 */
 
 #include <stdio.h>
-#include <linux/ioctl.h>
-#include <linux/fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <signal.h>
 #include <getopt.h>
 #include <string.h>
-#include <stdio.h>
-#include <signal.h>
-#include <unistd.h>
 
 /* Declare IOCTL handlers */
 #define SW_IOCTL_MAGIC			'l'
@@ -59,6 +59,7 @@ int sig_int = 0;
  * @param s Signal value
  */
 void sig_handler(int s){
+    (void)s;
     sig_int = 1;
 }
 
@@ -151,7 +152,7 @@ int main(int argc, char **argv) {
             case 'h' : print_help(); break;
             case 'd' : dev = optarg; break;
             default:
-                printf("Unknown option %s\n", optopt);
+                printf("Unknown option %c\n", optopt);
                 return RET_ERR;
         }
     }
@@ -165,7 +166,7 @@ int main(int argc, char **argv) {
     printf("\t* Using the device: %s\n", dev);  
  
     int fd = open(dev, O_RDWR);
-    if (!fd) {
+    if (fd < 0) {
         printf("Unable to open the device %s\n", dev);
         return RET_ERR;
     }

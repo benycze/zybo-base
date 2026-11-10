@@ -20,6 +20,8 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/version.h>
+#include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/io.h>
 #include <linux/ioctl.h>
@@ -536,7 +538,11 @@ static int rgb_module_cdev_init(struct platform_device *pdev) {
 	dev_info(dev, "cdev init MAJOR=%d and MINOR=%d\n",n_major, n_minor);
 
 	/* create sysfs class to have easier access to it */
-    lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+	lp->sysclass = class_create(DRIVER_SYSFS_CLASS);
+#else
+	lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#endif
 	if (IS_ERR(lp->sysclass)) {
 		dev_err(dev, "Error during the sysfs class creation\n");
 		rc = -EFAULT;
@@ -659,7 +665,7 @@ err_region_req:
 	return rc;
 }
 
-static int rgb_led_module_remove(struct platform_device *pdev) {
+static void rgb_led_module_remove(struct platform_device *pdev) {
 	struct device *dev = &pdev->dev;
 	struct rgb_led_module_local *lp = dev_get_drvdata(dev);
 	rgb_module_cdev_exit(pdev);
@@ -669,7 +675,6 @@ static int rgb_led_module_remove(struct platform_device *pdev) {
 	kfree(lp);
 	dev_set_drvdata(dev, NULL);
 	dev_info(&pdev->dev, "rgb-led-module is being removed.\n");
-	return 0;
 }
 
 static void rgb_led_module_shutdown(struct platform_device *pdev) {
