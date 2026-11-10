@@ -9,14 +9,14 @@
 ###############################################################################
 # Export helping variables for the compilation via Makefile
 ## Root of the project
-PROJ_ROOT=$(shell pwd)/../../../petalinux-zybo
+PROJ_ROOT=$(shell pwd)/../../../debian-zybo
 # Cross compilation settings
 ifndef ARCH
 export ARCH=arm
 endif
 
 ifndef CROSS_COMPILE
-export CROSS_COMPILE:=arm-xilinx-linux-gnueabi-
+export CROSS_COMPILE:=arm-linux-gnueabihf-
 endif
 
 ifndef CONFIG_SWITCH_MODULE
@@ -24,7 +24,7 @@ CONFIG_SWITCH_MODULE=m
 endif
 
 CC=$(CROSS_COMPILE)gcc
-KERNEL_SRC=$(shell dirname `find ${PROJ_ROOT}/build/tmp/work/ -name .config`)
+KERNEL_SRC ?= $(PROJ_ROOT)/output/linux-xlnx/build
 # Makefile body ###############################################################
 # Put all default flags here
 MY_CFLAGS += 
