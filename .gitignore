@@ -1,4 +1,8 @@
 debian-zybo/reps
+debian-zybo/cache
+debian-zybo/output
+debian-zybo/.Xil
+.Xil/
 
 # Vivado generated files
 *.jou
@@ -9,3 +13,34 @@ debian-zybo/reps
 # Compiler outputs
 *.o
 *.a
+
+# Vivado project runs and generated files
+proj/*.cache/
+proj/*.hw/
+proj/*.runs/
+proj/drivers/
+proj/ps7_init*
+proj/*.bit.bin
+
+# Vivado BD generated files
+src/bd/*/hdl/
+src/bd/*/sim/
+src/bd/*/synth/
+src/bd/*/hw_handoff/
+src/bd/*/ipshared/
+src/bd/*/*.bda
+src/bd/*/*.veo
+src/bd/*/*.vho
+src/bd/*/*_ooc.xdc
+src/bd/*/*_sv.*
+src/bd/**/sim/
+src/bd/**/sim_tlm/
+src/bd/**/synth/
+src/bd/**/hdl/
+src/bd/**/drivers/
+src/bd/**/*.dcp
+src/bd/**/*_sim_netlist.*
+src/bd/**/*_stub.*
+src/bd/**/*.xdc
+src/bd/**/ps7_*
+src/bd/**/board_design_*_imp_*

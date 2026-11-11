@@ -21,6 +21,8 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/version.h>
+#include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/io.h>
 #include <linux/cdev.h>
@@ -277,7 +279,11 @@ static int switch_module_cdev_init(struct platform_device *pdev) {
 	dev_info(dev, "cdev init MAJOR=%d and MINOR=%d\n",n_major, n_minor);
 
 	/* Create the sysfs class */
-    lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0)
+	lp->sysclass = class_create(DRIVER_SYSFS_CLASS);
+#else
+	lp->sysclass = class_create(THIS_MODULE, DRIVER_SYSFS_CLASS);
+#endif
 	if (IS_ERR(lp->sysclass)) {
 		dev_err(dev, "Error during the sysfs class creation\n");
 		rc = -EFAULT;
@@ -401,7 +407,7 @@ err_region:
 	return rc;
 }
 
-static int switch_module_remove(struct platform_device *pdev) {
+static void switch_module_remove(struct platform_device *pdev) {
 	struct device *dev = &pdev->dev;
 	struct switch_module_local *lp = dev_get_drvdata(dev);
 
@@ -411,7 +417,6 @@ static int switch_module_remove(struct platform_device *pdev) {
 	release_mem_region(lp->mem_start, lp->mem_end - lp->mem_start + 1);
 	kfree(lp);
 	dev_set_drvdata(dev, NULL);
-	return 0;
 }
 
 

@@ -21,6 +21,11 @@ puts "INFO: Creating new project in $dest_dir"
 # Set the project name
 set _xil_proj_name_ "zybo-base"
 
+# Set board repository path for Vivado
+set board_files_dir [file normalize "${dest_dir}/board_files"]
+puts "INFO: Setting board.repoPaths to ${board_files_dir}"
+set_param board.repoPaths [list ${board_files_dir}]
+
 # Create project
 create_project ${_xil_proj_name_} ${dest_dir}  -part xc7z020clg400-1
 
@@ -33,6 +38,7 @@ set proj_dir [get_property directory [current_project]]
 
 # Set project properties
 set obj [current_project]
+set_property -name "board_part_repo_paths" -value [list ${board_files_dir}] -objects $obj
 set_property -name "board_part" -value "digilentinc.com:zybo-z7-20:part0:1.2" -objects $obj
 set_property -name "default_lib" -value "xil_defaultlib" -objects $obj
 set_property -name "enable_vhdl_2008" -value "1" -objects $obj
@@ -54,6 +60,11 @@ if {[string equal [get_filesets -quiet constrs_1] ""]} {
   create_fileset -constrset constrs_1
 }
 
+# Deal with IP cores
+puts "INFO: Updating IP cores ..."
+set_property ip_repo_paths [file normalize ${origin_dir}/src/3rd-party/vivado-library/ip] [current_project]
+update_ip_catalog -rebuild
+
 # Add local files from the original project (-no_copy_sources specified)
 # Fill all included paths here
 puts "INFO: Adding files into the project ..."
@@ -67,11 +78,6 @@ add_files -scan_for_includes -verbose -fileset sources_1 $files
 # Register the BD  
 set bd_file_obj [get_files -of_objects [get_filesets sources_1] [list "*$bd_file"]]
 set_property -name "registered_with_manager" -value "1" -objects $bd_file_obj
-
-# Deal with IP cores
-puts "INFO: Updating IP cores ..."
-set_property ip_repo_paths [file normalize ${origin_dir}/src/3rd-party/vivado-library/ip] [current_project]
-update_ip_catalog -rebuild
 
 # Constraint files
 set constr_files [list \

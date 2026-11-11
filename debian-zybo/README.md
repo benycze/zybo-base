@@ -2,36 +2,78 @@
 
 ## Required packages and SW
 
-You need to install following packages (my system is Debian Linux, stable):
+You need to install the following packages:
 
-* Flex
+* flex
+* bison
 * git
-* Bison
 * build-essential
 * qemu-user-static
 * debootstrap
 * binfmt-support
-* uuid-dev
-* libgnutls28-dev
+* libssl-dev
+* bc
+* u-boot-tools
 
-You also need to have to cross-compiler tools installed on your system. In my case, I have chosen the toolchain
-from Vitis (because it is already there and I have sourced them into PATH; details about Vivado version
-is in the root of this repo) but you can also try to install the gcc-arm-linux-gnueabihf package and try the build.
+For example, on Debian/Ubuntu systems:
+
+```bash
+sudo apt install flex bison git build-essential qemu-user-static debootstrap \
+    binfmt-support libssl-dev bc u-boot-tools
+```
+
+You also need to have the cross-compiler tools installed on your system. In my case, I have chosen the toolchain
+from Vivado / Vitis 2026.1 (sourced into PATH, providing `arm-linux-gnueabihf-`, `bootgen`, `vitis`, and `sdtgen`),
+but you can also install the `gcc-arm-linux-gnueabihf` package for cross-compilation.
+
+> [!NOTE]
+> Starting with Vitis 2026.1, legacy XSCT has been disabled in favor of the Vitis Unified Python API (`vitis -s`)
+> and System Device Tree generator (`sdtgen`). The build scripts automatically utilize this modern flow (refer to Xilinx UG1400).
 
 ## Time to build Debian image
 
-The package contains a build script `build-image.sh` which takes care of repo download, patching, artefact build
-(Linux kernel, uboot, FSBL, images preparations, device tree translation) and so on. Run the following command to
-get Debian image (be sure that Vivado (my choice) or Debian cross-compile toolchain is usable from command line - `arm-linux-gnueabihf-`):
+The package contains a build script `build-image.sh` which takes care of repo download, patching, artifact build
+(Linux kernel, u-boot, FSBL, images preparations, device tree translation) and so on. Run the following command to
+get the Debian image (be sure that Vivado/Vitis (or cross-compile toolchain `arm-linux-gnueabihf-`) is usable from the command line):
 
 ```bash
 ./build-image.sh -t
 ```
 
-The `-t` options collects all required artefact into `output/tarball` folder - without this, all artifacts will be
+The `-t` option collects all required artifacts into `output/tarball` folder - without this, all artifacts will be
 in individual project folders and you can take them from there.
 
-You can also inspect available options using the `-h` option.
+Without any arguments, `build-image.sh` performs an incremental build of all missing stages.
+
+### Build Script Options
+
+| Option | Description |
+|---|---|
+| `-s` | Download sources into cache and copy to `reps/` working tree |
+| `-t` | Collect all generated artifacts into `output/tarball` |
+| `-f` | Build First-Stage-Boot-Loader (FSBL) |
+| `-u` | Build U-BOOT |
+| `-k` | Build Linux Kernel |
+| `-d` | Build Device Tree (DTB & DTS) |
+| `-o` | Build the Debian Rootfs |
+| `-b` | Build bootloader (`BOOT.BIN` and `boot.scr`) |
+| `-v <distro>` | Debian distribution suite (default: `trixie`) |
+| `-j <jobs>` | Number of parallel build jobs (defaults to `$(nproc)`) |
+| `-c` | Clean build directory (`output/`) |
+| `-m` | Clean everything (`output/`, `reps/`, and `cache/`) |
+| `-r` | Rebuild all (cleans `output/` and triggers full build) |
+| `-h` | Display help and usage |
+
+### Download Cache Mechanism
+
+To avoid re-downloading multi-gigabyte git repositories (such as `linux-xlnx.git` and `u-boot-xlnx.git`) across rebuilds or after cleanups, a download cache is maintained in `cache/`:
+
+1. **Pristine Cache**: Cloned git repositories are stored unmodified in `cache/` (can be overridden via the `CACHE_FOLDER` environment variable).
+2. **Working Tree**: Repositories are copied from `cache/` into `reps/` before build operations. Source tree modifications (such as linking in-tree kernel drivers in `drivers/pb-zybo`) only affect the working copy in `reps/`, leaving the cache pristine.
+3. **Cleaning levels**:
+   * `./build-image.sh -c`: Deletes only the `output/` build artifacts. `cache/` and `reps/` are preserved.
+   * `./build-image.sh -m`: Completely purges `output/`, `reps/`, and `cache/`.
+   * If you wish to reset `reps/` to fresh pristine sources without re-downloading from the internet, simply run `rm -rf reps/`. The next run will copy fresh trees from `cache/` instantly.
 
 ## SD card preparation
 
@@ -56,18 +98,19 @@ Seems like you were able to format and mount all partitions :-). The next step i
 (from the build stage) into mounted folders. You can check the output using the `ls root_part` you should see the standard folder structure in Linux system.
 
 ```bash
-tar --preserve-permissions -xzvf output/tarball/debian-bookworm-rootfs-vanilla.tgz -C root_part
+tar --preserve-permissions -xzvf output/tarball/debian-trixie-rootfs-vanilla.tgz -C root_part
 ```
 
-The next step is to several files from the tarball folder into the `root_part/boot` directory.
+The next step is to copy files from the tarball folder (`output/tarball`) into the `root_part/boot` directory (or FAT boot partition):
 
-* _BOOT.bin_ - boot image with FSBL (First Stage BootLoader) and uboot. The first step in booting is that Zynq
-checks the first partition (FAT32 one) and finds the BOOT.bin file. After that, CPU starts the code of FSBL which
-is typically uploading bitstream (not our case), initialize peripherals and so on. The last step of FSBL is to run
-the uboot image which is just after the FSBL in the binary
-* _boot.scr_ - this file contains the uboot script which loads the Linux kernel, ramdisk, device tree and boots all the stuff.
-* _zynq-debian.dtb_ - this file contains the description and addresses of all peripheals on zybo board. The file is
-used by the Linux kernel.
+* _BOOT.BIN_ - boot image with FSBL (First Stage BootLoader) and U-Boot. The first step in booting is that Zynq
+checks the first partition (FAT32) and executes `BOOT.BIN`.
+* _boot.scr_ - this file contains the U-Boot script which loads the Linux kernel, initramfs, and device tree, and boots the system.
+* _zynq-debian.dtb_ - device tree blob containing peripheral descriptions for the Zybo board, used by the Linux kernel.
+* _uImage_ - compiled Linux kernel image for ARM/Zynq.
+* _initramdisk.image.gz_ - U-Boot wrapped initial ramdisk image.
+
+The kernel is compiled directly (`uImage` + kernel modules) and installed straight into the rootfs (`/boot` and `/lib/modules/`) and `output/tarball`, avoiding Debian package cross-dependency issues.
 
 The last step is to umount the structure and try to boot.
 

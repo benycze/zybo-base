@@ -18,8 +18,11 @@
 */
 
 #include <stdio.h>
-#include <linux/ioctl.h>
-#include <linux/fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/types.h>
 #include <getopt.h>
 #include <string.h>
 
@@ -219,7 +222,7 @@ int main(int argc, char **argv) {
             case 'h' : print_help(); break;
             case 'd' : dev = optarg; break;
             default:
-                printf("Unknown option %s\n", optopt);
+                printf("Unknown option %c\n", optopt);
                 return RET_ERR;
         }
     }
@@ -233,7 +236,7 @@ int main(int argc, char **argv) {
     printf("\t* Using the device: %s\n", dev);  
     
     int fd = open(dev, O_RDWR);
-    if (!fd) {
+    if (fd < 0) {
         printf("Unable to open the device %s\n", dev);
         return RET_ERR;
     }

@@ -1,4 +1,4 @@
-# PetaLinux Switch module
+# PB-Zybo Switch module
 
 The driver is implemented as character device where the reading is supported.
 
@@ -15,19 +15,18 @@ The IOCTL commands are following:
 ```
 ## Compilation
 
-The "all:" target in the Makefile template will compile compile the module.
+The module is integrated into the Linux kernel build tree automatically via `debian-zybo/build-image.sh -k`.
 
-To compile and install your module to the target file system copy on the host,
-simply run the command.
-    "petalinux-build -c kernel to configure & download kernel first, and then run
-    "petalinux-build -c switch-module" to build the module
-
-You can also compile the module out of the petalinux tool. All you have to do is to run the `make` command which
-which runs the cross compilation with arm-xilinx-linux-gnueabi- toolchain. You can also select the new toolachain via `ARCH` and `CROSS_COMPILE`
-variables. Additional compilation variables are taken via `MY_CFLAGS` variable. So, to run a different cross compilation with debug symbols run:
+You can also compile the module standalone out of the tree. Set `KERNEL_SRC` to point to the built kernel directory:
 
 ```bash
-make MY_CFLAGS="-g -O0 -DDEBUG"
+make KERNEL_SRC=/path/to/kernel/build
+```
+
+You can select custom flags or cross-compiler via `ARCH`, `CROSS_COMPILE`, and `MY_CFLAGS`:
+
+```bash
+make KERNEL_SRC=/path/to/kernel/build MY_CFLAGS="-g -O0 -DDEBUG"
 ```
 
 ## Device Tree

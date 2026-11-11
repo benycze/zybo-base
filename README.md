@@ -1,18 +1,18 @@
 # Zybo Base Image
 
-This repository contains the basic template which can be used for the template for development of another Zynq based images.
-It can be also considered as tutorial for Zybo Z7-20 board (or Zynq based images).
+This repository contains the basic template which can be used as a foundation for developing Zynq-based images and hardware designs.
+It serves as a comprehensive reference and tutorial for the Digilent Zybo Z7-20 board running Debian Linux.
 
 **Required tools:**
 
-* Vivado 2024.2 for bitstream build
-* Vivado 2020.2 for Petalinux build (not tested for a longer time so it might require some corrections)
-* Petalinux 2020.2
+* Vivado / Vitis 2026.1 for bitstream, FSBL, device tree, and software build
+* Cross-compilation toolchain `arm-linux-gnueabihf-` (or sourced from Vitis 2026.1)
+* Host packages for Debian image bootstrapping (`qemu-user-static`, `debootstrap`, `u-boot-tools`, `libssl-dev`, etc.)
 
 ## How to Generate the Vivado Project
 
-The project for Vivado tool is initialized based on the `create_project.tcl` script. The project files are generated
-inside the `proj` folder by running of the following command (or run the `regenerate-project.sh` which also cleans the folder using git tool):
+The Vivado project is initialized using the `create_project.tcl` script. The project files are generated
+inside the `proj` folder by running the following command (or running `regenerate-project.sh`, which also cleans the folder):
 
 ```bash
 vivado -mode batch -source create_project.tcl
@@ -24,14 +24,11 @@ or
 ./regenerate-project.sh
 ```
 
-After that, you can use the Vivado and open the `zybo-base.xpr` file. All source files, board designs, HDL and
-IP cores are under the `src` directory and they are included in the [create_project.tcl](proj/create_project.tcl)
-file. Therefore, edit this file if you want to version it and have a possibility to restore a project!
+After project creation, you can open `proj/zybo-base.xpr` in Vivado. All source files, block designs, HDL, constraints, and
+custom IP cores reside under the `src` directory and are managed by [create_project.tcl](proj/create_project.tcl).
+Always update `create_project.tcl` if you add new sources so the project can be reproduced cleanly.
 
-There is also a helping (and simple) tcl script which can be used for the automatic export of HW design from the
-command line.
-It just opens the created project and runs syntheis, implementation, bitstream generation and HW export to
-XSA file. All you have to do is to run the similar command like before:
+To run synthesis, implementation, bitstream generation, and hardware export to XSA from the command line:
 
 ```bash
 vivado -mode batch -source translate_project.tcl
@@ -43,240 +40,163 @@ or
 ./translate-project.sh
 ```
 
-Helping scripts are really small and they doesn't check if any file was modified. They are here just for the case that you
-don't want to write the command by hand.
+The resulting hardware handoff file (`board_design_wrapper.xsa`) and bitstream (`board_design_wrapper.bit.bin`) will be placed in the `proj` directory.
 
-Currently supported Linux Distributions:
+## Building the Debian Linux Image
 
-* _Petalinux (default one)_ - presented on this page because this is being supported by Xilinx
-* _Debian Linux_ - you can also use the standard Debian distribution with Linux kernel (patched by Xilinx). 
-Documentation is [here](debian-zybo).
+The primary Linux distribution for this board is **Debian 13 (Trixie)**, built using the automated scripts located in [`debian-zybo/`](debian-zybo/).
 
-## How to translate the Petalinux
+The build system compiles:
+* **FSBL (First-Stage BootLoader)**: generated via Vitis 2026.1 Unified Python API (`generate-fsbl.py`)
+* **U-Boot**: compiled from Xilinx U-Boot source tree
+* **Linux Kernel**: compiled directly from Xilinx Linux tree (`uImage` + loadable kernel modules)
+* **Device Tree**: generated using `sdtgen` and patched with custom device nodes
+* **Bootloader Image (`BOOT.BIN` and `boot.scr`)**: assembled with `bootgen` and `mkimage`
+* **Root Filesystem**: native Debian rootfs generated via `debootstrap` (with QEMU user emulation), pre-loaded with kernel modules, FPGA utilities, and custom drivers
 
-Petalinux project for Zybo board is inside the `petalinux-zybo` folder. It contains a helping script which is capable to configure HW
-platform, kernel and rootfs (packages inside the image, etc.). You can use the default values. The build process also requires the
-exported HW architecture in XSA file (used for Device Tree, bitstream, etc.). The XSA file is automatically exported at the end of
-translation TCL script (`translate_project.sh` in `proj` folder). Alternatively, you can translate the design in your Vivado tool and
-export it via `File -> Export -> Export Hardware`, click on `Include bitstream` and you can go.
-
-To build the Petalinux with defaults:
+To build all components and assemble the distribution tarball:
 
 ```bash
-./translate-petalinux.sh
+cd debian-zybo
+./build-image.sh -t
 ```
 
-To build the Petalinux with conguration changes run the script with `-h` option to get more info. If you want to customize everything
-you need to run:
+Refer to the [Debian Zybo Documentation](debian-zybo/README.md) for detailed instructions, prerequisites, and build options (`-k`, `-u`, `-f`, `-d`, `-o`, `-c`, `-m`, etc.).
+
+## How to Boot Debian Linux on the Zybo Board
+
+Booting requires a micro SD card partitioned into two parts:
+
+1. **Partition 1 (FAT32, ~100MB, flagged as bootable)**:
+   Copy the following boot artifacts from `debian-zybo/output/tarball/`:
+   * `BOOT.BIN`
+   * `boot.scr`
+   * `uImage`
+   * `zynq-debian.dtb`
+   * `initramdisk.image.gz`
+
+2. **Partition 2 (ext4, remainder of SD card)**:
+   Extract the rootfs archive into the mounted partition:
+   ```bash
+   sudo tar --preserve-permissions -xzvf debian-zybo/output/tarball/debian-trixie-rootfs-vanilla.tgz -C /media/user/rootfs/
+   ```
+
+### Board Configuration & Serial Console
+
+1. Set the board jumper (`JP5`) to **SD** boot mode.
+2. Insert the micro SD card into the Zybo board slot.
+3. Connect a micro-USB cable between the Zybo PROG/UART port and your host PC.
+4. Open a serial terminal (e.g. `minicom`, `screen`, or `picocom`) configured with:
+   * **Baud rate**: 115200
+   * **Data bits**: 8, Parity: None, Stop bits: 1
+   * **Hardware Flow Control**: Off
+   ```bash
+   sudo minicom -b 115200 -D /dev/ttyUSB1
+   ```
+5. Power on the board. You will observe U-Boot loading the kernel, initramfs, and device tree, followed by the Debian Linux login prompt.
+
+**Default credentials:**
+* User: `root` / Password: `root`
+* User: `fpga` / Password: `fpga`
+
+## Checking the FPGA Design & Hardware Modules
+
+The Debian image includes a systemd service (`fpga.service`) that automatically programs the bitstream and loads the device tree overlay at boot using `fpgautil`.
+
+You can manually reload or re-program the PL using:
 
 ```bash
-./translate-petalinux.sh -k -r
+fpgautil -b /lib/firmware/fpga/board_design_wrapper.bit.bin -o /lib/firmware/fpga/board_design_wrapper.bit.bin.dtbo
 ```
 
-## How to Boot the Petalinux
-
-The design can be booted on real HW or in QEMU simulator - everything can be found inside the Petalinux documentation on Xilinx website.
-
-### HW
-
-Booting on HW can be done via - (i) JTAG or (ii) SD card image. Both methods requires the translated design and Petalinux. The booting
-via SD card requires following steps:
-
-1. Set the jumper on Zybo board for booting from the SD card
-2. Format the SD card with FAT32 image and copy the following files from the `image/linux` folder inside the `petalinux-zybo` project - *BOOT.BIN* (bootloader), *image.ub* (kernel image), *boot.scr* (boot script for u-boot)
-3. Insert the SD card and
-4. Connect to serial port (using Minicom or other tools). The configuration of serial line is:
-
-* Baud: 115200
-* Data bits: 8
-* Parity: no
-* No HW flow control
-* Stop bits: 1
-
-You should see the linux booting on the terminal. You can log in using the credentials - user **root**, password **root**
-
-Booting via JTAG is useful for debug cases when you don't want to work a lot with SD card (it consumes time and it is not so
-efficient). The process consists of following steps:
-
-1. Set the jumper on Zybo board for booting via the JTAG
-2. Start the `hw_server` from the Vivado toolchain (allows remote programming)
-3. Run the following command:
+### Inspecting Hardware Registers
+The image includes the `peek` and `poke` utilities in `/usr/bin/` to access the ARM physical memory space and AXI peripherals (which start at `0x4000_0000`):
 
 ```bash
-petalinux-boot --jtag --prebuilt 3 --hw_server-url localhost:3121
+# Read register
+peek 0x41200000
+
+# Write register
+poke 0x41200000 0x0000000F
 ```
 
-The serial line configuration is as same as in the case of SD card boot. I am recommending you to prepare the serial line
-berofe the running of petalinux-boot to see all messages. However, it should be fine to run the serial line after the petalinux command.
+### Testing Custom Peripheral Drivers
+Custom driver test utilities are pre-compiled and installed in `/usr/local/bin/`:
+* `ledmodule-test -d /dev/pb-led`
+* `rgb-ledmodule-test -d /dev/pb-rgb-led`
+* `switchmodule-test -d /dev/pb-switch`
 
-You will see something like:
+## How to Debug the Linux Kernel
+
+The simplest possibility is to use the [KGDB](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/kgdb.html) approach.
+
+### 1. Kernel Configuration
+The required debugging options are enabled in `sw-sources/kernel-config/kernel_config.cfg`:
+* `CONFIG_GDB_SCRIPTS=y`
+* `CONFIG_CONSOLE_POLL=y`
+* `CONFIG_KGDB=y`
+* `CONFIG_KGDB_SERIAL_CONSOLE=y`
+
+### 2. Serial Console Multiplexer (`agent-proxy`)
+Because the board is controlled and debugged via the same serial line, a serial console multiplexer is needed.
+The tool is located in `util/agent-proxy`:
 
 ```bash
-user@device $-> petalinux-boot --jtag --prebuilt 3 --hw_server-url 127.0.0.1:3121
-INFO: Sourcing build tools
-INFO: FPGA manager enabled, skipping bitstream to load in jtag...
-INFO: Append dtb - /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/system.dtb and other options to boot zImage
-INFO: Launching XSDB for file download and boot.
-INFO: This may take a few minutes, depending on the size of your image.
-INFO: Downloading ELF file: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/zynq_fsbl.elf to the target.
-INFO: Downloading ELF file: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/u-boot.elf to the target.
-INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/system.dtb at 0x00100000
-INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/uImage at 0x00200000
-INFO: Loading image: /home/pavel/Sources/hdl/zybo/zybo-base.git/petalinux-zybo/pre-built/linux/images/rootfs.cpio.gz.u-boot at 0x04000000
-
+cd util/agent-proxy
+make
 ```
 
-### QEMU
-
-QEMU emulator is useful in the time of image preparation - you can also do some work without HW.
-This step requires a finished built of Petalinux project. After that, you can run the simulation using the following command:
+Run `agent-proxy` to multiplex `/dev/ttyUSB1` (at 115200 baud) into two network ports: port `5550` for console terminal access and port `5551` for GDB:
 
 ```bash
-petalinux-boot --qemu --prebuilt 3
+./util/agent-proxy/agent-proxy 5550^5551 0 /dev/ttyUSB1,115200
 ```
 
-The meaning of prebuilt stages is following:
-
-* prebuilt 1 - boot includes FPGA bitstream programming
-* prebuilt 2 - bot includes U-BOOT stage
-* prebuilt 3 - boot includes a  Linux image (full system boot)
-
-## How to check the FPGA design
-
-Petalinux project is using the FPGA manager which allows you to load the FPGA bitstream after the boot. This can be useful if you
-want to debug HW via SSH (translate, prepare device tree and configuration). The generated petalinux is embedded with the
-`fpga-manager` from Xilinx which allows to program a bitstream and overlay device tree. Initial bitstream is inside the `/lib/firmware/`
-folder. To load the design you need to to run the `fpgautil` command (the example output is also attached):
-
-```bash
-user@device $-> fpgautil -b /lib/firmware/base/board_design_wrapper.bit.bin
-fpga_manager fpga0: writing board_design_wrapper.bit.bin to Xilinx Zynq FPGA Manager
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /fpga-full/firmware-name
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay0
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay1
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/clocking0
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/overlay2
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_gpio_led
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_gpio_sw
-OF: overlay: WARNING: memory leak will occur if overlay removed, property: /__symbols__/axi_led_pwm
-GPIO IRQ not connected
-XGpio: gpio@41210000: registered, base is 902
-GPIO IRQ not connected
-XGpio: gpio@41200000: registered, base is 898
-
-```
-
-Notice that if you want to load the design during the boot, disable the FPGA Manager functionality during the device import.
-
-After the successfull loading, you can use the `peek` and `poke` commands to read/write from the ARM address space. The address
-space also contains the PL (programmable logic) which starts on the 0x4000_0000 offset.
-
-## How to debug the Linux Kernel
-
-The simplest possibility is to use the [KGDB - usage](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/gdb-kernel-debugging.html#:~:text=The%20kernel%20debugger%20kgdb%2C%20hypervisors,simplify%20typical%20kernel%20debugging%20steps.), [KGDB - overall info](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/kgdb.html) approach which is known quite well from the
-Linux world. First of all, we need to configure the kernel. To achieve this, run the
-`petalinux-config -c kernel` and set the following variables (everything is in the
-`Kernel hacking` submenu).
-
-* CONFIG_GDB_SCRIPTS
-* CONFIG_CONSOLE_POLL
-* CONFIG_KGDB
-* CONFIG_KGDB_SERIAL_CONSOLE
-
-We need to translate the serial console multiplexer because we are going to debug
-and control the board via the same serial line. Linux world has a great tool which
-handles this. The code of this tool is located inside the `util/proxy-agent` directory.
-Enter the directory and translate it using the `make` command. We will use the translated
-tool in next steps :-).
-
-The kernel parameters are configured to wait on the KGDB (if translated) connection.
-Another kernel parameters can be configured via the `petalinux-configure` command.
-
-Translate the kernel and boot it (via JTAG or SD card). We need to enter the directory
-where the kernel was translated (because of the GDB scripts are located there).
-
-Now, we need to setup the debug and communication session via the `proxy-agent` tool.
-The following command creates two slots for communication (5550) and gdb debug (5551)
-via the serial line `/dev/ttyUSB1` with baudrate 115200 (you can also check opened
-ports via the `ss` tool).
-
-```bash
- ./agent-proxy 5550^5551 0 /dev/ttyUSB1,115200 
-```
-
-We can connect to communication terminal using the `telnet` command:
+You can connect to the serial communication terminal via `telnet`:
 
 ```bash
 telnet localhost 5550
 ```
 
-Now, we need to run the debug session of the kernel. This is achieved in two steps:
+### 3. Starting the Debug Session
+1. **Enable KGDB on target**:
+   On the running target board (via the serial console or SSH), activate kgdboc:
+   ```bash
+   echo ttyPS0 > /sys/module/kgdboc/parameters/kgdboc
+   ```
+   You will see:
+   ```text
+   KGDB: Registered I/O driver kgdboc
+   KGDB: Waiting for connection from remote gdb...
+   ```
 
-* Enabling the debug session via the sysfs on the debugged target - `echo ttyPS0 > /sys/module/kgdboc/parameters/kgdboc`
-* Connection to the debug session via the GBD
+2. **Connect with GDB**:
+   From your host machine, navigate to the kernel build directory and start GDB (`gdb-multiarch` or `arm-linux-gnueabihf-gdb`):
+   ```bash
+   cd debian-zybo/output/linux-xlnx/build
+   gdb-multiarch ./vmlinux
+   ```
 
-### Connection to debug session
+   Inside GDB, connect to the agent-proxy GDB port:
+   ```gdb
+   (gdb) target remote localhost:5551
+   Remote debugging using localhost:5551
+   arch_kgdb_breakpoint () at arch/arm/include/asm/kgdb.h:46
+   46        asm(__inst_arm(0xe7ffdeff));
+   (gdb)
+   ```
 
-The first mentioned command will enable the debug session via the ttyPS0 serial line.
-You will see something like this:
+### 4. Debugging Kernel Modules
+To debug custom kernel modules (such as `led-module`):
+1. On the target board, find the loaded base address of the module:
+   ```bash
+   cat /proc/modules
+   ```
+2. In GDB, load the module symbols with the target address:
+   ```gdb
+   add-symbol-file drivers/pb-zybo/led-module/led-module.ko 0xbf005000
+   ```
 
-```bash
-[   60.352486] KGDB: Registered I/O driver kgdboc
-[   60.372279] KGDB: Waiting for connection from remote gdb...
-```
-
-The first half of the process is done. Now, we need to enter the build directory
-of the kernel and start the debug session inside the `gdb` tool. The build folder has
-path like this `build/tmp/work/zynq_generic-xilinx-linux-gnueabi/linux-xlnx/5.4+git999-r0/linux-xlnx-5.4+git999` (correct this for your translation, you can also look for the
-`.config` file. The following command opens the translated `vmlinux` file. After that,
-we need to use the target remote localhost:5551 to connect to the debug session:
-
-```bash
-arm-xilinx-linux-gnueabi-gdb ./vmlinux
-GNU gdb (GDB) 8.3.1
-Copyright (C) 2019 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
-Type "show copying" and "show warranty" for details.
-This GDB was configured as "--host=x86_64-petalinux-linux --target=arm-xilinx-linux-gnueabi".
-Type "show configuration" for configuration details.
-For bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>.
-Find the GDB manual and other documentation resources online at:
-    <http://www.gnu.org/software/gdb/documentation/>.
-
-For help, type "help".
-Type "apropos word" to search for commands related to "word"...
-Reading symbols from ./vmlinux...
-(gdb) target remote localhost:5551
-Remote debugging using localhost:5551
-arch_kgdb_breakpoint ()
-    at /home/jeremy/zybo-base.git/petalinux-zybo/components/yocto/workspace/sources/linux-xlnx/arch/arm/include/asm/kgdb.h:46
-46		asm(__inst_arm(0xe7ffdeff));
-(gdb) 
-```
-
-We are done! You can insert breakpoints and debug the kernel and your modules :-).
-
-First of all, you have to be sure that the kernel module is compiled with -O0 and -g options. After that, you need to determine where the module is loaded.
-This can be done via `cat /proc/modules` command on the debugged machine. After that you have to add the symbol file in the `gbd` instance.
-The example for the mapping is: `add-symbol-file ../../project-spec/meta-user/recipes-modules/led-module/files/led-module.ko 0xbf005000`.
-After that, you can run all the gdb commands as usually :-).
-
-Some helping hints:
-
-* If you want to go back to the debug console - go to the remote target and run `echo g > /proc/sysrq-trigger`
-* You can create a `.gdbinit` file with symbol file loading but be aware of the situation that base linux module address can change between runs
-* Minimize the size of the image to load it faster during the debug. This image is larger because you may use it for different purposes :-)
-
-## How to obtain the Xilinx build toolchain
-
-The toolchain can be accessed via the Petalinux SDK. You have to do the following:
-
-```bash
-cd petalinux-zybo
-./source-toolchain.sh
-```
-
-The sourcing script checks if the the SDK is available and it also builds it for you if not.
+### Helpful Hints:
+* To return to the debug console from the target board: `echo g > /proc/sysrq-trigger`
+* You can create a `.gdbinit` file for automated symbol loading and connection setup.
