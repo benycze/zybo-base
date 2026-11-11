@@ -125,3 +125,78 @@ Custom driver test utilities are pre-compiled and installed in `/usr/local/bin/`
 * `ledmodule-test -d /dev/pb-led`
 * `rgb-ledmodule-test -d /dev/pb-rgb-led`
 * `switchmodule-test -d /dev/pb-switch`
+
+## How to Debug the Linux Kernel
+
+The simplest possibility is to use the [KGDB](https://01.org/linuxgraphics/gfx-docs/drm/dev-tools/kgdb.html) approach.
+
+### 1. Kernel Configuration
+The required debugging options are enabled in `sw-sources/kernel-config/kernel_config.cfg`:
+* `CONFIG_GDB_SCRIPTS=y`
+* `CONFIG_CONSOLE_POLL=y`
+* `CONFIG_KGDB=y`
+* `CONFIG_KGDB_SERIAL_CONSOLE=y`
+
+### 2. Serial Console Multiplexer (`agent-proxy`)
+Because the board is controlled and debugged via the same serial line, a serial console multiplexer is needed.
+The tool is located in `util/agent-proxy`:
+
+```bash
+cd util/agent-proxy
+make
+```
+
+Run `agent-proxy` to multiplex `/dev/ttyUSB1` (at 115200 baud) into two network ports: port `5550` for console terminal access and port `5551` for GDB:
+
+```bash
+./util/agent-proxy/agent-proxy 5550^5551 0 /dev/ttyUSB1,115200
+```
+
+You can connect to the serial communication terminal via `telnet`:
+
+```bash
+telnet localhost 5550
+```
+
+### 3. Starting the Debug Session
+1. **Enable KGDB on target**:
+   On the running target board (via the serial console or SSH), activate kgdboc:
+   ```bash
+   echo ttyPS0 > /sys/module/kgdboc/parameters/kgdboc
+   ```
+   You will see:
+   ```text
+   KGDB: Registered I/O driver kgdboc
+   KGDB: Waiting for connection from remote gdb...
+   ```
+
+2. **Connect with GDB**:
+   From your host machine, navigate to the kernel build directory and start GDB (`gdb-multiarch` or `arm-linux-gnueabihf-gdb`):
+   ```bash
+   cd debian-zybo/output/linux-xlnx/build
+   gdb-multiarch ./vmlinux
+   ```
+
+   Inside GDB, connect to the agent-proxy GDB port:
+   ```gdb
+   (gdb) target remote localhost:5551
+   Remote debugging using localhost:5551
+   arch_kgdb_breakpoint () at arch/arm/include/asm/kgdb.h:46
+   46        asm(__inst_arm(0xe7ffdeff));
+   (gdb)
+   ```
+
+### 4. Debugging Kernel Modules
+To debug custom kernel modules (such as `led-module`):
+1. On the target board, find the loaded base address of the module:
+   ```bash
+   cat /proc/modules
+   ```
+2. In GDB, load the module symbols with the target address:
+   ```gdb
+   add-symbol-file drivers/pb-zybo/led-module/led-module.ko 0xbf005000
+   ```
+
+### Helpful Hints:
+* To return to the debug console from the target board: `echo g > /proc/sysrq-trigger`
+* You can create a `.gdbinit` file for automated symbol loading and connection setup.
